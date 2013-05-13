@@ -1,9 +1,9 @@
 ----------------------------------------------------------------
 --
 -- Imparse
--- Cross-language parser generator.
+-- Cross-platform/language parser generator.
 --
--- Main.hs
+-- Imparse.hs
 --   Haskell implementatio of the Imparse parser parser.
 --
 --
@@ -16,22 +16,26 @@
 -- Main module for the Haskell implementation of the
 -- Imparse parser.
 
-module Main
+module Text.Imparse
   where
 
 import System.Environment (getArgs)
 import System.IO
-import Text.ParserCombinators.Parsec (ParseError)
 
-import Parser.AbstractSyntax ()
-import Parser.Parser (parseString)
+import Text.RichReports (report)
+import Text.Ascetic.HTML (html)
+
+import Text.Imparse.AbstractSyntax
+import Text.Imparse.Parse (parseParser)
+import Text.Imparse.Analysis (Analysis, analyze)
 
 ----------------------------------------------------------------
 -- The target of the output, as specified by the command-line
 -- arguments.
 
 data OutputTarget =
-    None
+    HTML
+  | ASCII
   deriving Eq
 
 ----------------------------------------------------------------
@@ -41,19 +45,19 @@ data OutputTarget =
 parseShow :: String -> IO ()
 parseShow fname =
   do { s <- readFile fname
-     ; r <- return $ parseString s
+     ; r <- return $ parseParser s
      ; case r of
-         Left err -> do { putStr "parse error: "; print (err :: ParseError) }
-         Right prgm ->
-           do { putStr $ show prgm
+         Left err -> do { putStr "parse error: "; putStr err }
+         Right parser ->
+           do { putStr $ show parser
               }
      }
 
-parse :: String -> IO (Maybe Top)
+parse :: String -> IO (Maybe (Parser Analysis))
 parse str =
-  do { r <- return $ parseString str
+  do { r <- return $ parseParser str
      ; case r of
-         Left err -> do { putStr "parse error: "; print (err :: ParseError) ; return Nothing }
+         Left err -> do { putStr "parse error: "; putStr err ; return Nothing }
          Right top -> return $ Just top
      }
 
@@ -65,27 +69,37 @@ procWrite :: [OutputTarget] -> Maybe String -> IO ()
 procWrite outs fname =
   do { fname     <- maybe (return "") return fname
      ; txt       <- if length fname > 0 then readFile fname else return ""
-     ; top       <- parse txt
-     ; case top of
+     ; parser    <- parse txt
+     ; case parser of
          Nothing -> return ()
-         Just top ->
-           do if JS `elem` outs then
-                do { js <- return $ extract $ JS.compile top
-                   ; putStr $ "\n  Wrote file \"" ++ fname ++ ".js\".\n"
-                   ; writeFile (fname++".js") $ js
-                   }
-              else
+         Just parser ->
+           do { parser <- return $ analyze parser
+              ; if HTML `elem` outs then
+                  do { txt <- return $ show parser
+                     ; writeFile (fname++".html") $ show $ html (report parser)
+                     ; putStr $ "  Wrote file \"" ++ fname ++ ".html\".\n"
+                     }
+                else
+                  do return ()
+              ; if ASCII `elem` outs then
+                  do { txt <- return $ show parser
+                     ; writeFile (fname++".txt") txt
+                     ; putStr $ "  Wrote file \"" ++ fname ++ ".txt\".\n"
+                     }
+                else
                 do return ()
+              }
      }
 
 usage :: IO ()
 usage = putStr "\n  Usage:\timparse \"path/file.p\"\n"
 
 cmd :: [OutputTarget] -> [String] -> IO ()
-cmd []      []            = usage
-cmd []      [f]           = usage
-cmd outs    [f]           = procWrite outs (Just f)
-cmd _ _                   = usage
+cmd [] []            = usage
+cmd ts ("-html":ss)  = cmd (HTML:ts) ss
+cmd ts ("-ascii":ss) = cmd (ASCII:ts) ss
+cmd ts [f]           = procWrite ts (Just f)
+cmd _ _              = usage
 
 ----------------------------------------------------------------
 -- The main function.
