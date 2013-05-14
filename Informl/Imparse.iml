@@ -1,0 +1,24 @@
+##//////////////////////////////////////////////////////////////
+##
+## Imparse.iml
+##
+## Module for parsing using imparse parser definitions.
+##
+## Dependencies:
+##   uxadt.js
+
+##//////////////////////////////////////////////////////////////
+## Module definition.
+
+
+module Imparse
+
+  function tokenize (parser, rawStr)
+    if parser is Parser(Productions(ps), Terminals(ts))
+      return |ts|
+    
+    return Nothing
+
+
+
+##eof

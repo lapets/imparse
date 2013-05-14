@@ -14,7 +14,6 @@ module Text.Imparse
   where
 
 import Data.List (splitAt, elemIndex)
-
 import System.Environment (getArgs)
 import System.IO
 
@@ -63,6 +62,9 @@ parse str =
 -- Take a file path in the form of a string, read it, and
 -- process it as specified by the command line.
 
+fileNamePrefix :: String -> String
+fileNamePrefix s = fst $ splitAt (maybe (length s) id (elemIndex '.' s)) s
+
 writeAndPutStr :: String -> String -> String -> IO ()
 writeAndPutStr file ext s =
   do { writeFile (file++"."++ext) s
@@ -78,7 +80,7 @@ procWrite outs fname =
          Nothing -> return ()
          Just parser ->
            do { parser <- return $ analyze parser
-              ; fname <- return $ fst $ splitAt (maybe (length fname) id (elemIndex '.' fname)) fname
+              ; fname <- return $ fileNamePrefix fname
               ; if HTML `elem` outs then
                   writeAndPutStr fname "html" (show parser)
                 else
@@ -95,7 +97,7 @@ procWrite outs fname =
      }
 
 usage :: IO ()
-usage = putStr "\n  Usage:\timparse \"path/file.p\"\n"
+usage = putStr "\n  Usage:\timparse [-html] [-ascii] [-uxadt] \"path/file.g\"\n"
 
 cmd :: [OutputTarget] -> [String] -> IO ()
 cmd [] []            = usage

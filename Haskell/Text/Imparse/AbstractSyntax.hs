@@ -13,6 +13,7 @@ module Text.Imparse.AbstractSyntax
   where
 
 import Data.String.Utils (join)
+import Data.List (nubBy)
 
 import qualified Text.RichReports as R
 import qualified Text.UXADT as U
@@ -53,7 +54,32 @@ data Element a =
   | RegExp String
   | ErrElement String
   deriving Eq
-    
+
+
+----------------------------------------------------------------
+-- Functions for inspecting parser instances.
+
+isTerminal :: Element a -> Bool
+isTerminal e = case e of
+  NonTerminal _ _ -> False
+  ErrElement _ -> False
+  _ -> True
+
+eqTerminal :: Element a -> Element a -> Bool
+eqTerminal t1 t2 = case (t1,t2) of
+  (Terminal t1  , Terminal t2  ) -> t1 == t2
+  (NewLine      , NewLine      ) -> True
+  (Indent       , Indent       ) -> True
+  (Unindent     , Unindent     ) -> True
+  (StringLiteral, StringLiteral) -> True
+  (RegExp r1    , RegExp r2    ) -> r1 == r2
+  _                              -> False
+
+terminals :: Parser a -> [Element a]
+terminals (Parser _ ps) =
+  let cs = concat [concat css | Production _ e css <- ps]
+  in nubBy eqTerminal $ concat [[e | e <- es, isTerminal e] | Choice _ _ es <- cs]
+
 ----------------------------------------------------------------
 -- Functions for converting a parser abstract syntax instance
 -- into a rich report.
@@ -99,7 +125,11 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
 -- Functions for converting a parser into a UXADT instance string.
 
 instance U.ToUXADT (Parser a) where
-  uxadt (Parser _ ps) = U.C "Parser" [U.uxadt p | p <- ps]
+  uxadt (p@(Parser _ ps)) = 
+    U.C "Parser" [
+      U.C "Productions" [U.L [U.uxadt p | p <- ps]],
+      U.C "Terminals" [U.L [U.uxadt t | t <- terminals p]]
+    ]
 
 instance U.ToUXADT (Production a) where
   uxadt (Production _ en css) = U.C "Production" [U.S en, U.uxadt css]
