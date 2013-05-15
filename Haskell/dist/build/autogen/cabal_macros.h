@@ -49,3 +49,10 @@
   (major1) == 0 && (major2) <  11 || \
   (major1) == 0 && (major2) == 11 && (minor) <= 2)
 
+/* package uxadt-0.0.0.1 */
+#define VERSION_uxadt "0.0.0.1"
+#define MIN_VERSION_uxadt(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  0 || \
+  (major1) == 0 && (major2) == 0 && (minor) <= 0)
+

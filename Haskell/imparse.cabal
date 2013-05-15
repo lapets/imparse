@@ -11,8 +11,8 @@ Cabal-Version:     >= 1.2
 
 Executable:        imparse
 Main-is:           Main.hs
-Build-Depends:     base >= 3 && < 5, MissingH, containers, text, split, ascetic, richreports
+Build-Depends:     base >= 3 && < 5, MissingH, containers >= 0.5.2.1, text, split, ascetic, richreports, uxadt
 
 --library
 --  Exposed-Modules: Text.Imparse
---  Build-Depends:   base >= 3 && < 5, MissingH, containers, text, split, ascetic, richreports
+--  Build-Depends:   base >= 3 && < 5, MissingH, containers, text, split, ascetic, richreports, uxadt

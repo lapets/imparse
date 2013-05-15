@@ -13,12 +13,35 @@
 
 module Imparse
 
-  function tokenize (parser, rawStr)
+  function tokenize (parser, raw)
     if parser is Parser(Productions(ps), Terminals(ts))
-      return |ts|
+      
+      local tokens := []
+
+      while |raw| > 0
+        raw := $Informl$__trim_whitespace_from_X(raw)
+        
+        local match := false
+        local longest := null
+
+        for t in ts
+          if t is Terminal(t)
+            if $Informl$__X_is_prefix_of_X(t, raw)
+              raw := $Informl$__suffix_of_X_after_index_X(raw, |t|)
+              match := true
+              longest := t
+        
+        if match == false
+          break
+        
+        if match == true
+          tokens := tokens + [longest]
+
+      return tokens
     
-    return Nothing
+    return nothing
 
-
+  function parse (parser, tokens)
+    return nothing
 
 ##eof
