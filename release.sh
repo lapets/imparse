@@ -7,7 +7,7 @@ cd ..
 echo Done.
 echo
 
-echo Building JavaScript library from Informl source.
+echo Building JavaScript library from Imparse source.
 informl -js Informl/Imparse.iml
 mv Informl/Imparse.js JavaScript/Imparse.js
 echo Done.

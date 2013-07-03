@@ -19,7 +19,7 @@ catchIO = Exception.catch
 version :: Version
 version = Version {versionBranch = [0,0,0,1], versionTags = []}
 prefix, bindirrel :: FilePath
-prefix        = "C:\\Documents and Settings\\Administrator\\Application Data\\cabal"
+prefix        = "C:\\Users\\al\\AppData\\Roaming\\cabal"
 bindirrel     = "bin"
 
 getBinDir :: IO FilePath
