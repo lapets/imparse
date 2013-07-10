@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
 --
 -- Imparse
--- Cross-platform/language parser generator.
+-- Cross-platform/-language parser generator.
 --
 -- Text/Imparse.hs
 --   Haskell implementation of the Imparse parser parser.
@@ -24,6 +24,7 @@ import Text.Ascetic.HTML (html)
 import Text.Imparse.AbstractSyntax
 import Text.Imparse.Parse (parseParser)
 import Text.Imparse.Analysis (Analysis, analyze)
+import Text.Imparse.ToHaskell
 
 ----------------------------------------------------------------
 -- The target of the output, as specified by the command-line
@@ -33,6 +34,7 @@ data OutputTarget =
     HTML
   | ASCII
   | UXADT
+  | HS
   deriving Eq
 
 ----------------------------------------------------------------
@@ -62,13 +64,16 @@ parse str =
 -- Take a file path in the form of a string, read it, and
 -- process it as specified by the command line.
 
+nothing :: IO ()
+nothing = return ()
+
 fileNamePrefix :: String -> String
 fileNamePrefix s = fst $ splitAt (maybe (length s) id (elemIndex '.' s)) s
 
 writeAndPutStr :: String -> String -> String -> IO ()
 writeAndPutStr file ext s =
   do { writeFile (file++"."++ext) s
-     ; putStr $ "  Wrote file \"" ++ file ++ "." ++ ext ++ "\".\n"
+     ; putStr $ "\n  Wrote file \"" ++ file ++ "." ++ ext ++ "\".\n"
      }
 
 procWrite :: [OutputTarget] -> Maybe String -> IO ()
@@ -81,29 +86,39 @@ procWrite outs fname =
          Just parser ->
            do { parser <- return $ analyze parser
               ; fname <- return $ fileNamePrefix fname
+
               ; if HTML `elem` outs then
-                  writeAndPutStr fname "html" (show parser)
+                  writeAndPutStr fname "html" (show $ html $ report parser)
                 else
-                  do return ()
+                  do nothing
+
               ; if ASCII `elem` outs then
-                  writeAndPutStr fname "html" (show parser)
+                  writeAndPutStr fname "txt" (show parser)
                 else
-                  do return ()
+                  do nothing
+
               ; if UXADT `elem` outs then
                   writeAndPutStr fname "js" (U.javaScriptModule fname (U.uxadt parser))
                 else
-                  do return ()
+                  do nothing
+              
+              ; if HS `elem` outs then
+                  do nothing
+                else
+                  do nothing
+              
               }
      }
 
 usage :: IO ()
-usage = putStr "\n  Usage:\timparse [-html] [-ascii] [-uxadt] \"path/file.g\"\n"
+usage = putStr "\n  Usage:\timparse [-html] [-ascii] [-uxadt] [-hs] \"path/file.g\"\n"
 
 cmd :: [OutputTarget] -> [String] -> IO ()
 cmd [] []            = usage
 cmd ts ("-html":ss)  = cmd (HTML:ts) ss
 cmd ts ("-ascii":ss) = cmd (ASCII:ts) ss
 cmd ts ("-uxadt":ss) = cmd (UXADT:ts) ss
+cmd ts ("-hs":ss)    = cmd (HS:ts) ss
 cmd ts [f]           = procWrite ts (Just f)
 cmd _ _              = usage
 

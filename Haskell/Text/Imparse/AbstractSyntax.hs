@@ -23,6 +23,10 @@ import qualified Text.UXADT as U
 
 type EntityName = String
 type Constructor = String
+type Multiplicity = Integer
+type Separator = String
+type TerminalString = String
+type RegularExpression = String
 
 data Parser a =
     Parser a [Production a]
@@ -46,12 +50,13 @@ data Association =
 
 data Element a =
     NonTerminal a EntityName
-  | Terminal String
+  | Many EntityName Multiplicity Separator
+  | Terminal TerminalString
   | NewLine
   | Indent
   | Unindent
   | StringLiteral
-  | RegExp String
+  | RegExp RegularExpression
   | ErrElement String
   deriving Eq
 

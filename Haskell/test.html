@@ -1,13 +1,285 @@
-Top ::=
-  Top | `Stmt
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
+    <style>
 
-Stmt ::=
-  Return | return `Exp
-  Continue | continue
-  Break | break
-  ^
-  Function | `> function
-   | `> break
+body {
+  font-family: Courier,Monospace;
+  font-size: 12px;
+}
 
-Stmt ::=
-  Return | return
+table {
+  font-family: Courier,Monospace;
+  font-size: 12px;
+}
+
+#RichReports_Message {
+  background-color: yellow;
+  padding: 3px;
+  border: 1px solid black;
+  font-family: Courier,Monospace;
+  font-size: 12px;
+}
+
+.RichReports_Clickable {
+  cursor: pointer;
+}
+
+.RichReports_Clickable_Exclamation {
+  background-color: yellow;
+  border: 1px solid black;
+  margin: 0px 5px 0px 5px;
+}
+
+.RichReports_Clickable:hover {
+  background-color: yellow;
+}
+
+.RichReports_BlockIndent {
+  margin-left: 10px;
+}
+
+.RichReports_Keyword {
+  font-weight: bold;
+  color: blue;
+}
+
+.RichReports_Variable {
+  font-style: italic;
+  color: green;
+}
+
+.RichReports_Literal {
+  font-weight: bold;
+  color: firebrick;
+}
+
+.RichReports_Highlight {
+  margin: 2px;
+}
+
+.RichReports_Highlight_Unbound {
+  background-color: orange;
+}
+
+.RichReports_Highlight_Duplicate {
+  background-color: yellow;
+}
+
+.RichReports_Highlight_Error {
+  background-color: lightpink;
+}
+
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">
+
+    </script>
+    <script>
+function msg (obj, msgs) {var html = '';for (var i = 0; i < msgs.length; i++) html += '<div class="RichReports_MessagePortion">' + msgs[i] + '</div>';document.getElementById('RichReports_Message').innerHTML = html;document.getElementById('RichReports_Message').style.display = 'inline-block';var top = $(obj).offset().top;var left = $(obj).offset().left;$('#RichReports_Message').offset({top:top + 15, left:left + 15});}
+    </script>
+  </head>
+  <body>
+    <div>
+      <div>
+&nbsp;
+      </div>
+      <span class="RichReports_Variable   ">
+Top
+      </span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>
+Top
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Variable   ">
+`Stmt
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>
+&nbsp;
+      </div>
+      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">
+Stmt
+      </span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>
+Return
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">
+return
+                  </span>
+                  <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Unbound" onclick="msg(this, ['Unbound.']);">
+`Exp
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+Continue
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">
+continue
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+Break
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">
+break
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+^
+            </td>
+            <td>
+
+            </td>
+          </tr>
+          <tr>
+            <td>
+Function
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Literal   ">
+`>
+                  </span>
+                  <span class="RichReports_Keyword   ">
+function
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Literal   ">
+`>
+                  </span>
+                  <span class="RichReports_Keyword   ">
+break
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>
+&nbsp;
+      </div>
+      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">
+Stmt
+      </span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>
+Return
+            </td>
+            <td>
+|
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
+!
+                </span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">
+return
+                  </span>
+                </span>
+              </span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div id="RichReports_Message" style="display:none;" onclick="this.style.display='none';">
+
+    </div>
+  </body>
+</html>

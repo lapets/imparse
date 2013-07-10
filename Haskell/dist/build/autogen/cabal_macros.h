@@ -7,8 +7,8 @@
   (major1) == 1 && (major2) <  2 || \
   (major1) == 1 && (major2) == 2 && (minor) <= 0)
 
-/* package ascetic-0.0.0.1 */
-#define VERSION_ascetic "0.0.0.1"
+/* package ascetic-0.0.0.2 */
+#define VERSION_ascetic "0.0.0.2"
 #define MIN_VERSION_ascetic(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  0 || \
@@ -20,6 +20,13 @@
   (major1) <  4 || \
   (major1) == 4 && (major2) <  5 || \
   (major1) == 4 && (major2) == 5 && (minor) <= 1)
+
+/* package compilation-0.0.0.1 */
+#define VERSION_compilation "0.0.0.1"
+#define MIN_VERSION_compilation(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  0 || \
+  (major1) == 0 && (major2) == 0 && (minor) <= 0)
 
 /* package containers-0.5.2.1 */
 #define VERSION_containers "0.5.2.1"
@@ -42,12 +49,12 @@
   (major1) == 0 && (major2) <  2 || \
   (major1) == 0 && (major2) == 2 && (minor) <= 1)
 
-/* package text-0.11.2.3 */
-#define VERSION_text "0.11.2.3"
+/* package text-0.11.3.1 */
+#define VERSION_text "0.11.3.1"
 #define MIN_VERSION_text(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  11 || \
-  (major1) == 0 && (major2) == 11 && (minor) <= 2)
+  (major1) == 0 && (major2) == 11 && (minor) <= 3)
 
 /* package uxadt-0.0.0.1 */
 #define VERSION_uxadt "0.0.0.1"

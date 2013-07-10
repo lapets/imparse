@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
 --
 -- Imparse
--- Cross-platform/language parser generator.
+-- Cross-platform/-language parser generator.
 --
 -- Main.hs
 --   Haskell executable wrapper for the Imparse parser parser.
