@@ -17,6 +17,7 @@ import Data.List (splitAt, elemIndex)
 import System.Environment (getArgs)
 import System.IO
 
+import qualified Control.Compilation.Compile as C
 import qualified Text.UXADT as U (uxadt, javaScriptModule)
 import Text.RichReports (report)
 import Text.Ascetic.HTML (html)
@@ -103,7 +104,7 @@ procWrite outs fname =
                   do nothing
               
               ; if HS `elem` outs then
-                  do nothing
+                  writeAndPutStr fname "hs" (C.extract (toAbstractSyntax parser) "")
                 else
                   do nothing
               

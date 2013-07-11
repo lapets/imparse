@@ -23,7 +23,7 @@ import qualified Text.UXADT as U
 
 type EntityName = String
 type Constructor = String
-type Multiplicity = Integer
+type Minimum = Integer
 type Separator = String
 type TerminalString = String
 type RegularExpression = String
@@ -50,7 +50,7 @@ data Association =
 
 data Element a =
     NonTerminal a EntityName
-  | Many EntityName Multiplicity Separator
+  | Many EntityName Minimum (Maybe Separator)
   | Terminal TerminalString
   | NewLine
   | Indent
@@ -59,7 +59,6 @@ data Element a =
   | RegExp RegularExpression
   | ErrElement String
   deriving Eq
-
 
 ----------------------------------------------------------------
 -- Functions for inspecting parser instances.

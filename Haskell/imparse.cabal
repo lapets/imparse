@@ -17,7 +17,7 @@ Library
 Executable imparse
   Main-Is:         Main.hs
   Build-Depends:   base >= 3 && < 5, MissingH, containers, text, split, compilation, ascetic, uxadt, richreports
-  
+
 Source-Repository head
   Type:            git
   Location:        https://github.com/lapets/imparse

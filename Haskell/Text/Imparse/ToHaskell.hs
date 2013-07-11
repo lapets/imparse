@@ -21,9 +21,62 @@ import Text.Imparse.AbstractSyntax
 ----------------------------------------------------------------
 -- Transformation functions.
 
+toAbstractSyntax :: Parser a -> Compile String ()
+toAbstractSyntax p =
+  do raw "module AbstractSyntax"
+     newline
+     raw "  where"
+     newlines 2
+     toDatatype p
+     newline
+     raw "--eof"
 
 toDatatype :: Parser a -> Compile String ()
-toDatatype p = do nothing
+toDatatype (Parser _ ps) =
+  let production :: Production a -> Compile String ()
+      production (Production _ e cs) =
+        do raw "data "
+           raw e
+           raw " = "
+           indent
+           newline
+           raw "  "
+           choices $ concat cs
+           unindent
+           newlines 2
+
+      choices :: [Choice a] -> Compile String ()
+      choices cs = case cs of
+        [c]  -> 
+          do choice c
+             newline
+             raw "deriving (Show, Eq)"
+        c:cs ->
+          do choice c 
+             newline
+             raw "| "
+             choices cs
+
+      choice :: Choice a -> Compile String ()
+      choice c = case c of
+        PrecedenceSeparator -> do nothing
+        Choice con assoc es -> 
+          do con <-
+               case con of
+                 Nothing  -> do { c <- fresh; return $ "C" ++ c }
+                 Just con -> return con
+             raw con
+             raw " "
+             mapM element es
+             nothing
+      
+      element :: Element a -> Compile String ()
+      element e = case e of
+        NonTerminal _ entity -> do { raw entity; raw " " }
+        _                    -> do nothing
+
+  in do mapM production ps
+        nothing
 
 toParsec :: Parser a -> Compile String ()
 toParsec p = do nothing
