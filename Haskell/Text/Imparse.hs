@@ -23,6 +23,7 @@ import Text.RichReports (report)
 import Text.Ascetic.HTML (html)
 
 import Text.Imparse.AbstractSyntax
+import Text.Imparse.Report
 import Text.Imparse.Parse (parseParser)
 import Text.Imparse.Analysis (Analysis, analyze)
 import Text.Imparse.ToHaskell

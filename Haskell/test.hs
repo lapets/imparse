@@ -1,4 +1,5 @@
-module AbstractSyntax where
+module AbstractSyntax
+  where
 
 data Top = 
     Top Stmt 
@@ -15,5 +16,6 @@ data Stmt =
 data Stmt = 
     Return 
   deriving (Show, Eq)
+
 
 --eof

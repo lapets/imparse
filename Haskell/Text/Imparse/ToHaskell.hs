@@ -32,7 +32,7 @@ toAbstractSyntax p =
      raw "--eof"
 
 toDatatype :: Parser a -> Compile String ()
-toDatatype (Parser _ ps) =
+toDatatype (Parser _ _ ps) =
   let production :: Production a -> Compile String ()
       production (Production _ e cs) =
         do raw "data "
@@ -73,7 +73,19 @@ toDatatype (Parser _ ps) =
       element :: Element a -> Compile String ()
       element e = case e of
         NonTerminal _ entity -> do { raw entity; raw " " }
+        Many e _ _           -> do { raw "["; elementNoSp e; raw "] " }
+        Indented e           -> element e
+        StringLiteral        -> raw "String"
+        NaturalLiteral       -> raw "Integer"
+        FloatLiteral         -> raw "Double"
+        RegExp _             -> raw "String"
         _                    -> do nothing
+
+      elementNoSp :: Element a -> Compile String ()
+      elementNoSp e = case e of
+        NonTerminal _ entity -> do { raw entity }
+        Many e _ _           -> do { raw "["; element e; raw "]" }
+        _                    -> element e
 
   in do mapM production ps
         nothing

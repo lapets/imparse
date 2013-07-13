@@ -26,7 +26,7 @@ import Text.Imparse.Analysis
 parseParser :: String -> Either String (Parser Analysis)
 parseParser s = 
   let blocks = splitOn "\n\n" (trim s)
-  in Right $ Parser Unanalyzed $ catMaybes [parseProductionOrDelimiters (trim b) | b <- blocks]
+  in Right $ Parser Unanalyzed [] $ catMaybes [parseProductionOrDelimiters (trim b) | b <- blocks]
 
 ----------------------------------------------------------------
 -- Parsing functions.
@@ -63,11 +63,32 @@ parseElement t =
   case t of
     '`':'`':s -> Terminal $ '`':s
     "`_"      -> NewLine
-    "`>"      -> Indent
-    "`<"      -> Unindent
     "`$"      -> StringLiteral
-    '`':'[':r -> 
-      if length r > 1 && (reverse r)!!0 == ']' then
+    "`#"      -> NaturalLiteral
+    "`#.#"    -> FloatLiteral
+    '`':'>':'[':s -> 
+      if length s > 1 && (reverse s)!!1 == ']' && (reverse s)!!0 == '<' then
+        case splitOn "/" (take (length s - 2) s) of
+          [s,n,sep] -> Many (NonTerminal Unanalyzed s) (read n) (Just sep)
+          [s,n]     -> Many (NonTerminal Unanalyzed s) (read n) Nothing
+          _ -> ErrElement t
+      else
+        ErrElement t
+    '`':'>':s -> 
+      if length s > 1 && (reverse s)!!0 == '<' then
+        Indented (NonTerminal Unanalyzed (take (length s - 1) s))
+      else
+        ErrElement t
+    '`':'[':s -> 
+      if length s > 1 && (reverse s)!!0 == ']' then
+        case splitOn "/" (take (length s - 1) s) of
+          [s,n,sep] -> Many (NonTerminal Unanalyzed s) (read n) (Just sep)
+          [s,n]     -> Many (NonTerminal Unanalyzed s) (read n) Nothing
+          _ -> ErrElement t
+      else
+        ErrElement t
+    '`':'{':r -> 
+      if length r > 1 && (reverse r)!!0 == '}' then
         RegExp $ take (length r - 1) r
       else
         ErrElement t

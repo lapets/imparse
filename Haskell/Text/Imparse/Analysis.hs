@@ -82,7 +82,7 @@ instance R.ToHighlights Analysis where
 -- Analysis algorithms.
 
 instance Analyze Parser where
-  analyze (Parser a ps) =
+  analyze (Parser a ims ps) =
     let 
         -- Check for duplicate productions.
         m = Map.fromListWith (+) [(e,1) | Production _ e _ <- ps]
@@ -92,7 +92,7 @@ instance Analyze Parser where
         -- Check that all entities are bound.
         ps'' = entitiesBound ps'
         
-    in Parser a ps''
+    in Parser a ims ps''
 
 entitiesBound :: [Production Analysis] -> [Production Analysis]
 entitiesBound ps = 
