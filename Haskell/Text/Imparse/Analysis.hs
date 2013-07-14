@@ -40,6 +40,17 @@ data Analysis2 =
     initials :: Initials
   } deriving (Eq, Show)
 
+data ChoiceKind =
+    ChoiceUnknown
+  | ChoiceBase
+  | ChoiceRecursivePrefix
+  | ChoiceRecursiveInfixLeftAssoc
+  | ChoiceRecursiveInfixRightAssoc
+  | ChoiceRecursiveInfixFlatAssoc
+  | ChoiceRecursive
+  | ChoiceOther
+  deriving (Eq, Show)
+
 data Analysis =
     Unanalyzed
   | Normal
@@ -72,11 +83,11 @@ instance R.ToMessages Analysis where
 
 instance R.ToHighlights Analysis where
   highlights a = case a of
-    Unanalyzed -> [R.Error]
+    Unanalyzed -> [R.HighlightError]
     Normal -> []
-    Duplicate -> [R.Duplicate]
-    Unbound -> [R.Unbound]
-    Unsupported -> [R.Error]
+    Duplicate -> [R.HighlightDuplicate]
+    Unbound -> [R.HighlightUnbound]
+    Unsupported -> [R.HighlightError]
 
 ----------------------------------------------------------------
 -- Analysis algorithms.
@@ -84,26 +95,29 @@ instance R.ToHighlights Analysis where
 instance Analyze Parser where
   analyze (Parser a ims ps) =
     let 
+        productions :: [Production Analysis] -> [Production Analysis]
+        productions ps = 
+          let es = [e | Production _ e _ <- ps]
+          in [Production a e (map (map (choice es)) cs) | Production a e cs <- ps]
+
+        choice es c = case c of
+          Choice c a es' -> Choice c a (map (element es) es')
+          _              -> c
+
+        element es e = case e of
+          NonTerminal _ e -> NonTerminal (if e `elem` es then Normal else Unbound) e
+          Many e n s      -> Many (element es e) n s
+          Indented e      -> Indented (element es e)
+          _ -> e
+
         -- Check for duplicate productions.
         m = Map.fromListWith (+) [(e,1) | Production _ e _ <- ps]
         chk e = case Map.lookup e m of Just n -> if n > 1 then Duplicate else Normal ; _ -> Unanalyzed
         ps' = [Production (chk e) e cs | Production _ e cs <- ps]
 
         -- Check that all entities are bound.
-        ps'' = entitiesBound ps'
-        
+        ps'' = productions ps'
+
     in Parser a ims ps''
-
-entitiesBound :: [Production Analysis] -> [Production Analysis]
-entitiesBound ps = 
-  let es = [e | Production _ e _ <- ps]
-      chkChoice c = case c of
-        Choice c a es -> Choice c a (map chkElement es)
-        _ -> c
-      chkElement e = case e of
-        NonTerminal _ e -> NonTerminal (if e `elem` es then Normal else Unbound) e
-        _ -> e
-  in [Production a e (map (map chkChoice) cs) | Production a e cs <- ps]
-
 
 --eof

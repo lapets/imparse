@@ -65,7 +65,7 @@ parseElement t =
     "`_"      -> NewLine
     "`$"      -> StringLiteral
     "`#"      -> NaturalLiteral
-    "`#.#"    -> FloatLiteral
+    "`#.#"    -> DecimalLiteral
     '`':'>':'[':s -> 
       if length s > 1 && (reverse s)!!1 == ']' && (reverse s)!!0 == '<' then
         case splitOn "/" (take (length s - 2) s) of

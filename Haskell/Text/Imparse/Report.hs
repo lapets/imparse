@@ -46,20 +46,24 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
     R.Row [
       R.Field (maybe (R.Conc []) R.Text c), 
       R.Field (R.Text (show a)), 
-      R.Field (R.Span [] [R.Text "testing"] [R.Conc [R.report e | e <- es]])
+      R.Field (R.Span [] [] [R.Conc [R.report e | e <- es]])
       ]
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
   report r = case r of
-    NonTerminal a n -> R.C R.Variable (R.highlights a) (R.messages a) $ "`" ++ n
+    NonTerminal a n -> R.var_ (R.highlights a) (R.messages a) $ "`" ++ n
     Many e n ms     -> 
       R.Span [] [] $ 
-        [R.Text "`[", R.report e, R.Text "/", R.Text (show n)] ++ (maybe [] (\s -> [R.Text $ "/" ++ s]) ms) ++ [R.Text "]"]
-    Indented e      -> R.Span [] [] [R.Text "`>", R.report e, R.Text "<"]
-    Terminal t      -> R.C R.Keyword [] [] $ t
-    NewLine         -> R.C R.Literal [] [] $ "`_"
-    StringLiteral   -> R.C R.Literal [] [] $ "`$"
-    RegExp r        -> R.Text $ "`{" ++ r ++ "]"
-    ErrElement s    -> R.Text $ "`!!!(" ++ s ++ ")!!!"
+           [ R.key "`[", R.report e, R.key "/", R.Text (show n) ] 
+        ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
+        ++ [R.key "]"]
+    Indented e      -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
+    Terminal t      -> R.key t
+    NewLine         -> R.key "`_"
+    StringLiteral   -> R.key "`$"
+    NaturalLiteral  -> R.key "`#"
+    DecimalLiteral  -> R.key "`#.#"
+    RegExp r        -> R.Span [] [] [R.key "`{", R.Text r, R.key "}"]
+    ErrElement s    -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
 
 --eof

@@ -21,6 +21,13 @@
   (major1) == 4 && (major2) <  5 || \
   (major1) == 4 && (major2) == 5 && (minor) <= 1)
 
+/* package bytestring-0.9.2.1 */
+#define VERSION_bytestring "0.9.2.1"
+#define MIN_VERSION_bytestring(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  9 || \
+  (major1) == 0 && (major2) == 9 && (minor) <= 2)
+
 /* package compilation-0.0.0.1 */
 #define VERSION_compilation "0.0.0.1"
 #define MIN_VERSION_compilation(major1,major2,minor) (\
@@ -28,12 +35,26 @@
   (major1) == 0 && (major2) <  0 || \
   (major1) == 0 && (major2) == 0 && (minor) <= 0)
 
-/* package containers-0.5.2.1 */
-#define VERSION_containers "0.5.2.1"
+/* package containers-0.4.2.1 */
+#define VERSION_containers "0.4.2.1"
 #define MIN_VERSION_containers(major1,major2,minor) (\
   (major1) <  0 || \
-  (major1) == 0 && (major2) <  5 || \
-  (major1) == 0 && (major2) == 5 && (minor) <= 2)
+  (major1) == 0 && (major2) <  4 || \
+  (major1) == 0 && (major2) == 4 && (minor) <= 2)
+
+/* package directory-1.1.0.2 */
+#define VERSION_directory "1.1.0.2"
+#define MIN_VERSION_directory(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  1 || \
+  (major1) == 1 && (major2) == 1 && (minor) <= 0)
+
+/* package file-embed-0.0.4.9 */
+#define VERSION_file_embed "0.0.4.9"
+#define MIN_VERSION_file_embed(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  0 || \
+  (major1) == 0 && (major2) == 0 && (minor) <= 4)
 
 /* package richreports-0.0.0.1 */
 #define VERSION_richreports "0.0.0.1"
@@ -49,12 +70,12 @@
   (major1) == 0 && (major2) <  2 || \
   (major1) == 0 && (major2) == 2 && (minor) <= 1)
 
-/* package text-0.11.3.1 */
-#define VERSION_text "0.11.3.1"
+/* package text-0.11.2.3 */
+#define VERSION_text "0.11.2.3"
 #define MIN_VERSION_text(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  11 || \
-  (major1) == 0 && (major2) == 11 && (minor) <= 3)
+  (major1) == 0 && (major2) == 11 && (minor) <= 2)
 
 /* package uxadt-0.0.0.1 */
 #define VERSION_uxadt "0.0.0.1"

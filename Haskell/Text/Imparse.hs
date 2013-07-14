@@ -13,9 +13,15 @@
 module Text.Imparse
   where
 
+import Data.Char (toUpper)
 import Data.List (splitAt, elemIndex)
+import Data.FileEmbed
+import System.Directory (createDirectory, removeDirectoryRecursive, doesDirectoryExist, doesFileExist, removeFile)
 import System.Environment (getArgs)
-import System.IO
+import System.IO ()
+import Prelude hiding (catch)
+import System.IO.Error hiding (catch)
+import Control.Exception (throwIO, catch)
 
 import qualified Control.Compilation.Compile as C
 import qualified Text.UXADT as U (uxadt, javaScriptModule)
@@ -26,18 +32,26 @@ import Text.Imparse.AbstractSyntax
 import Text.Imparse.Report
 import Text.Imparse.Parse (parseParser)
 import Text.Imparse.Analysis (Analysis, analyze)
-import Text.Imparse.ToHaskell
+import Text.Imparse.Compile.Haskell
 
 ----------------------------------------------------------------
 -- The target of the output, as specified by the command-line
 -- arguments.
 
+type HaskellModulePrefix = String
+
 data OutputTarget =
     HTML
   | ASCII
   | UXADT
-  | HS
+  | HASKELL HaskellModulePrefix
   deriving Eq
+
+emitHaskell :: [OutputTarget] -> Maybe HaskellModulePrefix
+emitHaskell ots = case ots of
+  []           -> Nothing
+  HASKELL p :_ -> Just p
+  ot:ots       -> emitHaskell ots
 
 ----------------------------------------------------------------
 -- Take a file path in the form of a string, and try to parse
@@ -66,8 +80,21 @@ parse str =
 -- Take a file path in the form of a string, read it, and
 -- process it as specified by the command line.
 
+-- usageTXT = $(embedFile "Output/usage.txt")
+
 nothing :: IO ()
 nothing = return ()
+
+createDirectoryIfNotExists :: FilePath -> IO ()
+createDirectoryIfNotExists dir = 
+  do chk <- doesDirectoryExist dir
+     if chk then nothing else createDirectory dir
+
+removeIfExists :: FilePath -> IO ()
+removeIfExists file = removeFile file `catch` handleExists
+  where handleExists e
+          | isDoesNotExistError e = return ()
+          | otherwise = throwIO e
 
 fileNamePrefix :: String -> String
 fileNamePrefix s = fst $ splitAt (maybe (length s) id (elemIndex '.' s)) s
@@ -75,7 +102,7 @@ fileNamePrefix s = fst $ splitAt (maybe (length s) id (elemIndex '.' s)) s
 writeAndPutStr :: String -> String -> String -> IO ()
 writeAndPutStr file ext s =
   do { writeFile (file++"."++ext) s
-     ; putStr $ "\n  Wrote file \"" ++ file ++ "." ++ ext ++ "\".\n"
+     ; putStr $ "  Wrote file \"" ++ file ++ "." ++ ext ++ "\".\n"
      }
 
 procWrite :: [OutputTarget] -> Maybe String -> IO ()
@@ -88,6 +115,7 @@ procWrite outs fname =
          Just parser ->
            do { parser <- return $ analyze parser
               ; fname <- return $ fileNamePrefix fname
+              ; putStr "\n"
 
               ; if HTML `elem` outs then
                   writeAndPutStr fname "html" (show $ html $ report parser)
@@ -104,11 +132,14 @@ procWrite outs fname =
                 else
                   do nothing
               
-              ; if HS `elem` outs then
-                  writeAndPutStr fname "hs" (C.extract (toAbstractSyntax parser) "")
-                else
-                  do nothing
-              
+              ; case emitHaskell outs of
+                  Nothing  -> do nothing
+                  Just pre ->
+                    do moduleName <- return $ (\(c:cs) -> toUpper c : cs) fname
+                       writeAndPutStr "AbstractSyntax" "hs" (C.extract (toAbstractSyntax pre parser) "")
+                       writeAndPutStr "Report" "hs" (C.extract (toRichReport pre parser) "")
+                       writeAndPutStr "Parse" "hs" (C.extract (toParsec pre parser) "")
+
               }
      }
 
@@ -120,7 +151,7 @@ cmd [] []            = usage
 cmd ts ("-html":ss)  = cmd (HTML:ts) ss
 cmd ts ("-ascii":ss) = cmd (ASCII:ts) ss
 cmd ts ("-uxadt":ss) = cmd (UXADT:ts) ss
-cmd ts ("-hs":ss)    = cmd (HS:ts) ss
+cmd ts ("-hs":p:ss)  = cmd (HASKELL p:ts) ss
 cmd ts [f]           = procWrite ts (Just f)
 cmd _ _              = usage
 

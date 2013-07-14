@@ -57,7 +57,10 @@ data Element a =
   | NewLine
   | StringLiteral
   | NaturalLiteral
-  | FloatLiteral
+  | DecimalLiteral
+  | Identifier
+  | Constructor
+  | Flag
   | RegExp RegularExpression
   | ErrElement String
   deriving Eq
@@ -68,9 +71,25 @@ data Element a =
 isTerminal :: Element a -> Bool
 isTerminal e = case e of
   NonTerminal _ _ -> False
+  Many _ _ _      -> False
   Indented _      -> False
   ErrElement _    -> False
   _ -> True
+
+
+isData :: Element a -> Bool
+isData e = case e of
+  NonTerminal _ _ -> True
+  Many _ _ _      -> True
+  Indented _      -> True
+  StringLiteral   -> True
+  NaturalLiteral  -> True
+  DecimalLiteral  -> True
+  Identifier      -> True
+  Constructor     -> True
+  Flag            -> True
+  RegExp _        -> True
+  _               -> False
 
 eqTerminal :: Element a -> Element a -> Bool
 eqTerminal t1 t2 = case (t1,t2) of
@@ -78,7 +97,7 @@ eqTerminal t1 t2 = case (t1,t2) of
   (NewLine       , NewLine       ) -> True
   (StringLiteral , StringLiteral ) -> True
   (NaturalLiteral, NaturalLiteral) -> True
-  (FloatLiteral  , FloatLiteral  ) -> True
+  (DecimalLiteral, DecimalLiteral) -> True
   (RegExp r1     , RegExp r2     ) -> r1 == r2
   _                                -> False
 
@@ -112,7 +131,7 @@ instance U.ToUXADT (Element a) where
     NewLine         -> U.C "Newline" []
     StringLiteral   -> U.C "StringLiteral" []
     NaturalLiteral  -> U.C "NaturalLiteral" []
-    FloatLiteral    -> U.C "FloatLiteral" []
+    DecimalLiteral  -> U.C "DecimalLiteral" []
     RegExp r        -> U.C "RegExp" [U.S r]
     ErrElement s    -> U.C "ErrElement" [U.S s]
 
@@ -141,7 +160,7 @@ instance Show (Element a) where
     NewLine         -> "`_"
     StringLiteral   -> "`$"
     NaturalLiteral  -> "`#"
-    FloatLiteral    -> "`#.#"
+    DecimalLiteral  -> "`#.#"
     RegExp r        -> "`{" ++ r ++ "}"
     ErrElement s    -> "`!!!(" ++ s ++ ")!!!"
   
