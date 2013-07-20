@@ -12,8 +12,8 @@ Stmt ::=
    Continue | continue
       Break | break
             ^  
-   Function | `> function
-            | `> break
+   Function | function
+            | break
 
 Stmt ::=
      Return | return

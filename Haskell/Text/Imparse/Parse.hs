@@ -38,24 +38,25 @@ parseProductionOrDelimiters s =
       case splitOn " " line of
         [entity, "::="] -> 
           Just $ 
-            Production Unanalyzed entity $ 
-              splitOn [PrecedenceSeparator] $ 
-                catMaybes [parseChoice s | s <- lines, trim s /= ""]
+            Production Unanalyzed entity $
+              map (Choices Unanalyzed) $ 
+                splitOn [PrecedenceSeparator Unanalyzed] $ 
+                  catMaybes [parseChoice s | s <- lines, trim s /= ""]
         _ -> Nothing
     _ -> Nothing
 
 parseChoice :: String -> Maybe (Choice Analysis)
 parseChoice s =
   case filter ((/=) "") $ splitOn " " (trim s) of
-    ("|":es)   -> Just $ Choice Nothing AssocNone [parseElement e | e <- es, e /= ""]
-    ("<":es)   -> Just $ Choice Nothing AssocLeft [parseElement e | e <- es, e /= ""]
-    (">":es)   -> Just $ Choice Nothing AssocRight [parseElement e | e <- es, e /= ""]
-    ("~":es)   -> Just $ Choice Nothing AssocFlat [parseElement e | e <- es, e /= ""]
-    (c:"|":es) -> Just $ Choice (Just c) AssocNone [parseElement e | e <- es, e /= ""]
-    (c:"<":es) -> Just $ Choice (Just c) AssocLeft [parseElement e | e <- es, e /= ""]
-    (c:">":es) -> Just $ Choice (Just c) AssocRight [parseElement e | e <- es, e /= ""]
-    (c:"~":es) -> Just $ Choice (Just c) AssocFlat [parseElement e | e <- es, e /= ""]
-    ["^"]      -> Just $ PrecedenceSeparator
+    ("|":es)   -> Just $ Choice Unanalyzed Nothing AssocNone [parseElement e | e <- es, e /= ""]
+    ("<":es)   -> Just $ Choice Unanalyzed Nothing AssocLeft [parseElement e | e <- es, e /= ""]
+    (">":es)   -> Just $ Choice Unanalyzed Nothing AssocRight [parseElement e | e <- es, e /= ""]
+    ("~":es)   -> Just $ Choice Unanalyzed Nothing AssocFlat [parseElement e | e <- es, e /= ""]
+    (c:"|":es) -> Just $ Choice Unanalyzed (Just c) AssocNone [parseElement e | e <- es, e /= ""]
+    (c:"<":es) -> Just $ Choice Unanalyzed (Just c) AssocLeft [parseElement e | e <- es, e /= ""]
+    (c:">":es) -> Just $ Choice Unanalyzed (Just c) AssocRight [parseElement e | e <- es, e /= ""]
+    (c:"~":es) -> Just $ Choice Unanalyzed (Just c) AssocFlat [parseElement e | e <- es, e /= ""]
+    ["^"]      -> Just $ PrecedenceSeparator Unanalyzed
     _          -> Nothing
 
 parseElement :: String -> Element Analysis

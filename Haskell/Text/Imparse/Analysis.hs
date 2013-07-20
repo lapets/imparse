@@ -33,20 +33,29 @@ data Initials =
     Initials
   deriving (Eq, Show)
 
-data Analysis2 =
+data Analysis3 =
+    AP Structure
+  | AC ChoiceKind Structure
+  | ACS ChoicesKind Structure
+  | AE Structure
+  deriving (Eq, Show)
+
+data Structure =
   Analysis {
     variables :: Variables,
     nonterminals :: NonTerminals,
     initials :: Initials
   } deriving (Eq, Show)
 
+data ChoicesKind =
+    ChoicesKind
+  deriving (Eq, Show)
+
 data ChoiceKind =
     ChoiceUnknown
   | ChoiceBase
   | ChoiceRecursivePrefix
-  | ChoiceRecursiveInfixLeftAssoc
-  | ChoiceRecursiveInfixRightAssoc
-  | ChoiceRecursiveInfixFlatAssoc
+  | ChoiceRecursiveInfix
   | ChoiceRecursive
   | ChoiceOther
   deriving (Eq, Show)
@@ -98,11 +107,11 @@ instance Analyze Parser where
         productions :: [Production Analysis] -> [Production Analysis]
         productions ps = 
           let es = [e | Production _ e _ <- ps]
-          in [Production a e (map (map (choice es)) cs) | Production a e cs <- ps]
+          in [Production a e [Choices a (map (choice es) cs) | Choices a cs <- css] | Production a e css <- ps]
 
         choice es c = case c of
-          Choice c a es' -> Choice c a (map (element es) es')
-          _              -> c
+          Choice a c asc es' -> Choice a c asc (map (element es) es')
+          _                  -> c
 
         element es e = case e of
           NonTerminal _ e -> NonTerminal (if e `elem` es then Normal else Unbound) e

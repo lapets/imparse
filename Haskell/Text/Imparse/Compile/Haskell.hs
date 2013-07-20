@@ -47,19 +47,19 @@ toAbstractSyntax prefix p =
 toDatatype :: Parser a -> Compile String ()
 toDatatype (Parser _ _ ps) =
   let production :: Production a -> Compile String ()
-      production (Production _ e cs) =
+      production (Production _ e css) =
         do raw "data "
            raw e
            raw " = "
            indent
            newline
            raw "  "
-           choices $ concat cs
+           mapM choices css
            unindent
            newlines 2
 
-      choices :: [Choice a] -> Compile String ()
-      choices cs = case cs of
+      choices :: Choices a -> Compile String ()
+      choices (Choices a cs) = case cs of
         [c]  -> 
           do choice c
              newline
@@ -68,12 +68,12 @@ toDatatype (Parser _ _ ps) =
           do choice c 
              newline
              raw "| "
-             choices cs
+             choices (Choices a cs)
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator -> do nothing
-        Choice con _ es -> 
+        PrecedenceSeparator _ -> do nothing
+        Choice _ con _ es -> 
           do con <-
                case con of
                  Nothing  -> do { c <- fresh; return $ "C" ++ c }
@@ -121,27 +121,27 @@ toRichReport prefix p =
 toReportFuns :: Parser a -> Compile String ()
 toReportFuns (Parser _ _ ps) =
   let production :: Production a -> Compile String ()
-      production (Production _ e cs) =
+      production (Production _ e css) =
         do raw $ "instance Report " ++ e ++ " where"
            indent
            newline
            raw "report x = case x of"
            indent
            newline
-           choices $ concat cs
+           mapM choices css
            unindent
            unindent
            newline
 
-      choices :: [Choice a] -> Compile String ()
-      choices cs = case cs of
+      choices :: Choices a -> Compile String ()
+      choices (Choices a cs) = case cs of
         []   -> do nothing
-        c:cs -> do { choice c; newline; choices cs }
+        c:cs -> do { choice c; newline; choices (Choices a cs) }
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator -> do nothing
-        Choice con _ es -> 
+        PrecedenceSeparator _ -> do nothing
+        Choice _ con _ es -> 
           do con <-
                case con of
                  Nothing  -> do { c <- fresh; return $ "C" ++ c }
@@ -150,7 +150,7 @@ toReportFuns (Parser _ _ ps) =
              ves <- return $ [("v" ++ show k, es!!k) | k <- [0..length es-1]]
              raw $ con ++ " " ++ join " " [v | (v,e) <- ves, isData e] ++ " -> "
              raw $ "R.Span [] [] $ [" ++ join ", " (catMaybes $ map element ves) ++ "]"
-      
+
       element :: (String, Element a) -> Maybe String
       element (v,e) = case e of
         NonTerminal _ entity -> Just $ "R.report " ++ v
@@ -193,27 +193,27 @@ toParsec prefix p =
 toParsecDefs :: Parser a -> Compile String ()
 toParsecDefs (Parser _ _ ps) =
   let production :: Production a -> Compile String ()
-      production (Production _ e cs) =
+      production (Production _ e css) =
         do raw $ "instance Report " ++ e ++ " where"
            indent
            newline
            raw "report x = case x of"
            indent
            newline
-           choices $ concat cs
+           mapM choices css
            unindent
            unindent
            newline
 
-      choices :: [Choice a] -> Compile String ()
-      choices cs = case cs of
+      choices :: Choices a -> Compile String ()
+      choices (Choices a cs) = case cs of
         []   -> do nothing
-        c:cs -> do { choice c; newline; choices cs }
+        c:cs -> do { choice c; newline; choices (Choices a cs) }
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator -> do nothing
-        Choice con _ es -> 
+        PrecedenceSeparator _ -> do nothing
+        Choice _ con _ es -> 
           do con <-
                case con of
                  Nothing  -> do { c <- fresh; return $ "C" ++ c }
