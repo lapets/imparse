@@ -17,6 +17,7 @@ import Data.List (nubBy)
 
 import qualified Text.RichReports as R
 import qualified Text.UXADT as U
+import qualified StaticAnalysis.Annotated as A
 
 ----------------------------------------------------------------
 -- Parser data structure.
@@ -34,12 +35,16 @@ data Parser a =
   deriving Eq
 
 data Production a =
-    Production a EntityName [[Choice a]]
+    Production a EntityName [Choices a]
   deriving Eq
-  
+
+data Choices a =
+    Choices a [Choice a]
+  deriving Eq
+
 data Choice a =
-    Choice (Maybe Constructor) Association [Element a]
-  | PrecedenceSeparator
+    Choice a (Maybe Constructor) Association [Element a]
+  | PrecedenceSeparator a
   deriving Eq
 
 data Association =
@@ -64,6 +69,13 @@ data Element a =
   | RegExp RegularExpression
   | ErrElement String
   deriving Eq
+
+----------------------------------------------------------------
+-- Static analysis annotation setting and retrieval.
+
+instance A.Annotated Parser where
+  annotate (Parser _ ms ps) a = Parser a ms ps
+  annotation (Parser a ms ps) = a
 
 ----------------------------------------------------------------
 -- Functions for inspecting parser instances.
@@ -103,8 +115,8 @@ eqTerminal t1 t2 = case (t1,t2) of
 
 terminals :: Parser a -> [Element a]
 terminals (Parser _ _ ps) =
-  let cs = concat [concat css | Production _ e css <- ps]
-  in nubBy eqTerminal $ concat [[e | e <- es, isTerminal e] | Choice _ _ es <- cs]
+  let cs = concat [cs | Production _ e css <- ps, Choices _ cs <- css]
+  in nubBy eqTerminal $ concat [[e | e <- es, isTerminal e] | Choice _ _ _ es <- cs]
 
 ----------------------------------------------------------------
 -- Functions for converting a parser into a UXADT instance string.
@@ -119,8 +131,11 @@ instance U.ToUXADT (Parser a) where
 instance U.ToUXADT (Production a) where
   uxadt (Production _ en css) = U.C "Production" [U.S en, U.uxadt css]
 
+instance U.ToUXADT (Choices a) where
+  uxadt (Choices _ cs) = U.C "Choices" [U.uxadt c | c <- cs]
+
 instance U.ToUXADT (Choice a) where
-  uxadt (Choice c _ es) = U.C "Choice" [maybe U.None U.S c, U.uxadt es]
+  uxadt (Choice _ c _ es) = U.C "Choice" [maybe U.None U.S c, U.uxadt es]
 
 instance U.ToUXADT (Element a) where
   uxadt e = case e of
@@ -144,12 +159,15 @@ instance Show (Parser a) where
 
 instance Show (Production a) where
   show (Production a en css) = 
-    en ++ " ::=\n  " ++ join "\n  ^\n  " [join "\n  " $ map show cs | cs <- css]
+    en ++ " ::=\n  " ++ join "\n  ^\n  " [show cs | cs <- css]
+
+instance Show (Choices a) where
+  show (Choices a cs) = join "\n  " $ map show cs
 
 instance Show (Choice a) where
-  show (PrecedenceSeparator) = "^"
-  show (Choice c a es) = 
-    (maybe "" id c) ++ " " ++ show a ++ " " ++ (join " " $ map show es)
+  show (PrecedenceSeparator a) = "^"
+  show (Choice a c assoc es) = 
+    (maybe "" id c) ++ " " ++ show assoc ++ " " ++ (join " " $ map show es)
 
 instance Show (Element a) where
   show e = case e of

@@ -49,8 +49,8 @@
   (major1) == 1 && (major2) <  1 || \
   (major1) == 1 && (major2) == 1 && (minor) <= 0)
 
-/* package file-embed-0.0.4.9 */
-#define VERSION_file_embed "0.0.4.9"
+/* package file-embed-0.0.4.8 */
+#define VERSION_file_embed "0.0.4.8"
 #define MIN_VERSION_file_embed(major1,major2,minor) (\
   (major1) <  0 || \
   (major1) == 0 && (major2) <  0 || \
@@ -69,6 +69,13 @@
   (major1) <  0 || \
   (major1) == 0 && (major2) <  2 || \
   (major1) == 0 && (major2) == 2 && (minor) <= 1)
+
+/* package staticanalysis-0.0.0.1 */
+#define VERSION_staticanalysis "0.0.0.1"
+#define MIN_VERSION_staticanalysis(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  0 || \
+  (major1) == 0 && (major2) == 0 && (minor) <= 0)
 
 /* package text-0.11.2.3 */
 #define VERSION_text "0.11.2.3"

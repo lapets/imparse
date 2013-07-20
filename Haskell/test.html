@@ -2,7 +2,6 @@
   <head>
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
     <style>
-
 body {
   font-family: Courier,Monospace;
   font-size: 12px;
@@ -19,6 +18,7 @@ table {
   border: 1px solid black;
   font-family: Courier,Monospace;
   font-size: 12px;
+  cursor: pointer;
 }
 
 .RichReports_Clickable {
@@ -29,14 +29,13 @@ table {
   background-color: yellow;
   border: 1px solid black;
   margin: 0px 5px 0px 5px;
+  padding: 0px 2px 0px 2px;
+  font-size: 10px;
+  font-size: 9px;
 }
 
 .RichReports_Clickable:hover {
   background-color: yellow;
-}
-
-.RichReports_BlockIndent {
-  margin-left: 10px;
 }
 
 .RichReports_Keyword {
@@ -52,6 +51,12 @@ table {
 .RichReports_Literal {
   font-weight: bold;
   color: firebrick;
+}
+
+.RichReports_Error {
+  font-weight: bold;
+  color: red;
+  text-decoration: underline;
 }
 
 .RichReports_Highlight {
@@ -70,42 +75,26 @@ table {
   background-color: lightpink;
 }
 
-    </style>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js">
-
-    </script>
-    <script>
-function msg (obj, msgs) {var html = '';for (var i = 0; i < msgs.length; i++) html += '<div class="RichReports_MessagePortion">' + msgs[i] + '</div>';document.getElementById('RichReports_Message').innerHTML = html;document.getElementById('RichReports_Message').style.display = 'inline-block';var top = $(obj).offset().top;var left = $(obj).offset().left;$('#RichReports_Message').offset({top:top + 15, left:left + 15});}
-    </script>
+.RichReports_BlockIndent {
+  margin-left: 10px;
+}
+</style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+    <script>function msg (obj, msgs) {var html = '';for (var i = 0; i < msgs.length; i++) html += '<div class="RichReports_MessagePortion">' + msgs[i] + '</div>';document.getElementById('RichReports_Message').innerHTML = html;document.getElementById('RichReports_Message').style.display = 'inline-block';var top = $(obj).offset().top;var left = $(obj).offset().left;$('#RichReports_Message').offset({top:top + 15, left:left + 15});}</script>
   </head>
   <body>
     <div>
-      <div>
-&nbsp;
-      </div>
-      <span class="RichReports_Variable   ">
-Top
-      </span>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable   ">Top</span>
 ::=
       <div class="RichReports_BlockIndent">
         <table>
           <tr>
+            <td>Top</td>
+            <td>|</td>
             <td>
-Top
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Variable   ">
-`Stmt
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Variable   ">`Stmt</span>
               </span>
             </td>
           </tr>
@@ -113,75 +102,36 @@ Top
       </div>
     </div>
     <div>
-      <div>
-&nbsp;
-      </div>
-      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">
-Stmt
-      </span>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">Stmt</span>
 ::=
       <div class="RichReports_BlockIndent">
         <table>
           <tr>
+            <td>Return</td>
+            <td>|</td>
             <td>
-Return
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Keyword   ">
-return
-                  </span>
-                  <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Unbound" onclick="msg(this, ['Unbound.']);">
-`Exp
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">return</span>
+                <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Unbound" onclick="msg(this, ['Unbound.']);">`Exp</span>
               </span>
             </td>
           </tr>
           <tr>
+            <td>Continue</td>
+            <td>|</td>
             <td>
-Continue
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Keyword   ">
-continue
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">continue</span>
               </span>
             </td>
           </tr>
           <tr>
+            <td>Break</td>
+            <td>|</td>
             <td>
-Break
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Keyword   ">
-break
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">break</span>
               </span>
             </td>
           </tr>
@@ -189,33 +139,17 @@ break
             <td>
 
             </td>
-            <td>
-^
-            </td>
+            <td>^</td>
             <td>
 
             </td>
           </tr>
           <tr>
+            <td>Function</td>
+            <td>|</td>
             <td>
-Function
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Literal   ">
-`>
-                  </span>
-                  <span class="RichReports_Keyword   ">
-function
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">function</span>
               </span>
             </td>
           </tr>
@@ -223,22 +157,10 @@ function
             <td>
 
             </td>
+            <td>|</td>
             <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Literal   ">
-`>
-                  </span>
-                  <span class="RichReports_Keyword   ">
-break
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">break</span>
               </span>
             </td>
           </tr>
@@ -246,40 +168,23 @@ break
       </div>
     </div>
     <div>
-      <div>
-&nbsp;
-      </div>
-      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">
-Stmt
-      </span>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Duplicate" onclick="msg(this, ['Duplicate.']);">Stmt</span>
 ::=
       <div class="RichReports_BlockIndent">
         <table>
           <tr>
+            <td>Return</td>
+            <td>|</td>
             <td>
-Return
-            </td>
-            <td>
-|
-            </td>
-            <td>
-              <span>
-                <span class="RichReports_Clickable RichReports_Clickable_Exclamation" onclick="msg(this, ['testing']);">
-!
-                </span>
-                <span class="">
-                  <span class="RichReports_Keyword   ">
-return
-                  </span>
-                </span>
+              <span class="">
+                <span class="RichReports_Keyword   ">return</span>
               </span>
             </td>
           </tr>
         </table>
       </div>
     </div>
-    <div id="RichReports_Message" style="display:none;" onclick="this.style.display='none';">
-
-    </div>
+    <div id="RichReports_Message" style="display:none;" onclick="this.style.display='none';"></div>
   </body>
 </html>

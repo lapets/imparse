@@ -35,17 +35,20 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Production a) where
         R.Table [
           R.Intersperse 
             (R.Row [R.Field (R.Conc []), R.Field (R.Text "^"), R.Field (R.Conc [])]) 
-            [R.Conc [R.report c | c <- cs] | cs <- css]
+            [R.report cs | cs <- css]
         ]
       ]
     ]
 
+instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choices a) where
+  report (Choices a cs) = R.Conc [R.report c | c <- cs]
+
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
-  report (PrecedenceSeparator) = R.Text "^"
-  report (Choice c a es) =
+  report (PrecedenceSeparator a) = R.Text "^"
+  report (Choice a c asc es) =
     R.Row [
-      R.Field (maybe (R.Conc []) R.Text c), 
-      R.Field (R.Text (show a)), 
+      R.Field (maybe (R.Conc []) R.Text c),
+      R.Field (R.Span (R.highlights a) (R.messages a) [R.Text $ show asc]), 
       R.Field (R.Span [] [] [R.Conc [R.report e | e <- es]])
       ]
 

@@ -10,11 +10,14 @@
 ----------------------------------------------------------------
 -- Useful functions for the imparser parser generator.
 
+{-# LANGUAGE TemplateHaskell #-}
+
 module Text.Imparse
   where
 
 import Data.Char (toUpper)
 import Data.List (splitAt, elemIndex)
+import Data.ByteString.Char8 (unpack)
 import Data.FileEmbed
 import System.Directory (createDirectory, removeDirectoryRecursive, doesDirectoryExist, doesFileExist, removeFile)
 import System.Environment (getArgs)
@@ -80,8 +83,6 @@ parse str =
 -- Take a file path in the form of a string, read it, and
 -- process it as specified by the command line.
 
--- usageTXT = $(embedFile "Output/usage.txt")
-
 nothing :: IO ()
 nothing = return ()
 
@@ -144,7 +145,7 @@ procWrite outs fname =
      }
 
 usage :: IO ()
-usage = putStr "\n  Usage:\timparse [-html] [-ascii] [-uxadt] [-hs] \"path/file.g\"\n"
+usage = putStr $ unpack $(embedFile "Text/Imparse/usage")
 
 cmd :: [OutputTarget] -> [String] -> IO ()
 cmd [] []            = usage
