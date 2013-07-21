@@ -56,7 +56,7 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
     NonTerminal a n -> R.var_ (R.highlights a) (R.messages a) $ "`" ++ n
     Many e n ms     -> 
       R.Span [] [] $ 
-           [ R.key "`[", R.report e, R.key "/", R.Text (show n) ] 
+           [ R.key "`[", R.report e, R.key "/", R.Text (show n) ]
         ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
         ++ [R.key "]"]
     Indented e      -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
