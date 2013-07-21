@@ -72,7 +72,6 @@ toDatatype (Parser _ _ ps) =
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator _ -> do nothing
         Choice _ con _ es -> 
           do con <-
                case con of
@@ -88,10 +87,7 @@ toDatatype (Parser _ _ ps) =
         NonTerminal _ entity -> do { raw entity; raw " " }
         Many e _ _           -> do { raw "["; elementNoSp e; raw "] " }
         Indented e           -> element e
-        StringLiteral        -> raw "String"
-        NaturalLiteral       -> raw "Integer"
-        DecimalLiteral       -> raw "Double"
-        RegExp _             -> raw "String"
+        Terminal t           -> terminal t
         _                    -> do nothing
 
       elementNoSp :: Element a -> Compile String ()
@@ -99,6 +95,17 @@ toDatatype (Parser _ _ ps) =
         NonTerminal _ entity -> do { raw entity }
         Many e _ _           -> do { raw "["; element e; raw "]" }
         _                    -> element e
+
+      terminal :: Terminal -> Compile String ()
+      terminal t = case t of
+        StringLiteral  -> raw "String"
+        NaturalLiteral -> raw "Integer"
+        DecimalLiteral -> raw "Double"
+        Identifier     -> raw "String"
+        Constructor    -> raw "String"
+        Flag           -> raw "String"
+        RegExp _       -> raw "String"
+        _              -> do nothing        
 
   in do mapM production ps
         nothing
@@ -140,7 +147,6 @@ toReportFuns (Parser _ _ ps) =
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator _ -> do nothing
         Choice _ con _ es -> 
           do con <-
                case con of
@@ -156,16 +162,20 @@ toReportFuns (Parser _ _ ps) =
         NonTerminal _ entity -> Just $ "R.report " ++ v
         Many e' _ _          -> element (v,e')
         Indented e'          -> maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [" ++ r ++ "]") $ element (v,e')
-        Terminal t           -> Just $ "R.key \"" ++ t ++ "\""
-        NewLine              -> Just $ "R.Line [] []"
-        StringLiteral        -> Just $ "R.lit " ++ v
-        NaturalLiteral       -> Just $ "R.lit " ++ v
-        DecimalLiteral       -> Just $ "R.lit " ++ v
-        Identifier           -> Just $ "R.var " ++ v
-        Constructor          -> Just $ "R.Text " ++ v
-        Flag                 -> Just $ "R.Text " ++ v
-        RegExp _             -> Just $ "R.Text " ++ v
+        Terminal t           -> Just $ terminal v t
         _                    -> Nothing
+
+      terminal :: String -> Terminal -> String
+      terminal v t = case t of
+        Explicit s     -> "R.key \"" ++ s ++ "\""
+        NewLine        -> "R.Line [] []"
+        StringLiteral  -> "R.lit " ++ v
+        NaturalLiteral -> "R.lit " ++ v
+        DecimalLiteral -> "R.lit " ++ v
+        Identifier     -> "R.var " ++ v
+        Constructor    -> "R.Text " ++ v
+        Flag           -> "R.Text " ++ v
+        RegExp _       -> "R.Text " ++ v        
 
   in do mapM production ps
         nothing
@@ -212,7 +222,6 @@ toParsecDefs (Parser _ _ ps) =
 
       choice :: Choice a -> Compile String ()
       choice c = case c of
-        PrecedenceSeparator _ -> do nothing
         Choice _ con _ es -> 
           do con <-
                case con of
@@ -228,16 +237,20 @@ toParsecDefs (Parser _ _ ps) =
         NonTerminal _ entity -> Just $ "R.report " ++ v
         Many e' _ _          -> element (v,e')
         Indented e'          -> maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [" ++ r ++ "]") $ element (v,e')
-        Terminal t           -> Just $ "R.key \"" ++ t ++ "\""
-        NewLine              -> Just $ "R.Line [] []"
-        StringLiteral        -> Just $ "R.lit " ++ v
-        NaturalLiteral       -> Just $ "R.lit " ++ v
-        DecimalLiteral       -> Just $ "R.lit " ++ v
-        Identifier           -> Just $ "R.var " ++ v
-        Constructor          -> Just $ "R.Text " ++ v
-        Flag                 -> Just $ "R.Text " ++ v
-        RegExp _             -> Just $ "R.Text " ++ v
+        Terminal t           -> Just $ terminal v t
         _                    -> Nothing
+
+      terminal :: String -> Terminal -> String
+      terminal v t = case t of
+        Explicit s     -> "R.key \"" ++ s ++ "\""
+        NewLine        -> "R.Line [] []"
+        StringLiteral  -> "R.lit " ++ v
+        NaturalLiteral -> "R.lit " ++ v
+        DecimalLiteral -> "R.lit " ++ v
+        Identifier     -> "R.var " ++ v
+        Constructor    -> "R.Text " ++ v
+        Flag           -> "R.Text " ++ v
+        RegExp _       -> "R.Text " ++ v
 
   in do mapM production ps
         nothing

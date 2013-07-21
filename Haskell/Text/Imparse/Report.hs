@@ -44,11 +44,10 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choices a) where
   report (Choices a cs) = R.Conc [R.report c | c <- cs]
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
-  report (PrecedenceSeparator a) = R.Text "^"
   report (Choice a c asc es) =
     R.Row [
       R.Field (maybe (R.Conc []) R.Text c),
-      R.Field (R.Span (R.highlights a) (R.messages a) [R.Text $ show asc]), 
+      R.Field (R.Atom (R.highlights a) (R.messages a) [R.Text $ show asc]), 
       R.Field (R.Span [] [] [R.Conc [R.report e | e <- es]])
       ]
 
@@ -61,12 +60,19 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
         ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
         ++ [R.key "]"]
     Indented e      -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
-    Terminal t      -> R.key t
-    NewLine         -> R.key "`_"
-    StringLiteral   -> R.key "`$"
-    NaturalLiteral  -> R.key "`#"
-    DecimalLiteral  -> R.key "`#.#"
-    RegExp r        -> R.Span [] [] [R.key "`{", R.Text r, R.key "}"]
-    ErrElement s    -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
+    Terminal t      -> R.report t
+    Error s         -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
+
+instance R.ToReport Terminal where
+  report t = case t of
+    Explicit s     -> R.lit s
+    NewLine        -> R.key "`_"
+    StringLiteral  -> R.key "`$"
+    NaturalLiteral -> R.key "`#"
+    DecimalLiteral -> R.key "`#.#"
+    Identifier     -> R.key "`id"
+    Constructor    -> R.key "`con"
+    Flag           -> R.key "`flag"
+    RegExp r       -> R.Span [] [] [R.key "`{", R.Text r, R.key "}"]
 
 --eof

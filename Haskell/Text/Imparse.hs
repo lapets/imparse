@@ -63,7 +63,7 @@ emitHaskell ots = case ots of
 parseShow :: String -> IO ()
 parseShow fname =
   do { s <- readFile fname
-     ; r <- return $ parseParser s
+     ; r <- return $ (parseParser s :: Either String (Parser Analysis))
      ; case r of
          Left err -> do { putStr "parse error: "; putStr err }
          Right parser ->

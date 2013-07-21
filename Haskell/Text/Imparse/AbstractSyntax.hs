@@ -13,39 +13,39 @@ module Text.Imparse.AbstractSyntax
   where
 
 import Data.String.Utils (join)
-import Data.List (nubBy)
+import Data.List (nub)
 
 import qualified Text.RichReports as R
 import qualified Text.UXADT as U
-import qualified StaticAnalysis.Annotated as A
+import qualified StaticAnalysis.All as A
 
 ----------------------------------------------------------------
 -- Parser data structure.
 
 type Import = String
-type EntityName = String
+type NonTerminal = String
 type Constructor = String
-type Minimum = Integer
-type Separator = String
-type TerminalString = String
-type RegularExpression = String
 
 data Parser a =
     Parser a [Import] [Production a]
   deriving Eq
 
 data Production a =
-    Production a EntityName [Choices a]
+    Production a NonTerminal [Choices a]
   deriving Eq
 
 data Choices a =
     Choices a [Choice a]
   deriving Eq
 
-data Choice a =
+data Choice a = 
     Choice a (Maybe Constructor) Association [Element a]
-  | PrecedenceSeparator a
   deriving Eq
+
+type Minimum = Integer
+type Separator = String
+type TerminalString = String
+type RegularExpression = String
 
 data Association =
     AssocNone
@@ -55,10 +55,15 @@ data Association =
   deriving Eq
 
 data Element a =
-    NonTerminal a EntityName
+    NonTerminal a NonTerminal
   | Many (Element a) Minimum (Maybe Separator)
   | Indented (Element a)
-  | Terminal TerminalString
+  | Terminal Terminal
+  | Error String
+  deriving Eq
+
+data Terminal =
+    Explicit String
   | NewLine
   | StringLiteral
   | NaturalLiteral
@@ -67,7 +72,6 @@ data Element a =
   | Constructor
   | Flag
   | RegExp RegularExpression
-  | ErrElement String
   deriving Eq
 
 ----------------------------------------------------------------
@@ -77,46 +81,55 @@ instance A.Annotated Parser where
   annotate (Parser _ ms ps) a = Parser a ms ps
   annotation (Parser a ms ps) = a
 
+instance A.Annotated Production where
+  annotate (Production _ e css) a = Production a e css
+  annotation (Production a _ _) = a
+
+instance A.Annotated Choices where
+  annotate (Choices _ cs) a = Choices a cs
+  annotation (Choices a _) = a
+
+instance A.Annotated Choice where
+  annotate (Choice _ mc asc es) a = Choice a mc asc es
+  annotation (Choice a _ _ _) = a
+
+instance A.Annotated Element where
+  annotate e a = case e of
+    NonTerminal _ e -> NonTerminal a e
+    Many e m ms -> Many (A.annotate e a) m ms
+    Indented e -> Indented $ A.annotate e a
+    _ -> e
+  annotation e = case e of
+    NonTerminal a _ -> a
+    Many e _ _ -> A.annotation e
+    Indented e -> A.annotation e
+    _ -> A.unanalyzed
+
 ----------------------------------------------------------------
 -- Functions for inspecting parser instances.
 
-isTerminal :: Element a -> Bool
-isTerminal e = case e of
-  NonTerminal _ _ -> False
-  Many _ _ _      -> False
-  Indented _      -> False
-  ErrElement _    -> False
-  _ -> True
-
-
 isData :: Element a -> Bool
 isData e = case e of
-  NonTerminal _ _ -> True
-  Many _ _ _      -> True
-  Indented _      -> True
-  StringLiteral   -> True
-  NaturalLiteral  -> True
-  DecimalLiteral  -> True
-  Identifier      -> True
-  Constructor     -> True
-  Flag            -> True
-  RegExp _        -> True
+  NonTerminal _ _         -> True
+  Many _ _ _              -> True
+  Indented _              -> True
+  Terminal StringLiteral  -> True
+  Terminal NaturalLiteral -> True
+  Terminal DecimalLiteral -> True
+  Terminal Identifier     -> True
+  Terminal Constructor    -> True
+  Terminal Flag           -> True
+  Terminal (RegExp _)     -> True
   _               -> False
 
-eqTerminal :: Element a -> Element a -> Bool
-eqTerminal t1 t2 = case (t1,t2) of
-  (Terminal t1   , Terminal t2   ) -> t1 == t2
-  (NewLine       , NewLine       ) -> True
-  (StringLiteral , StringLiteral ) -> True
-  (NaturalLiteral, NaturalLiteral) -> True
-  (DecimalLiteral, DecimalLiteral) -> True
-  (RegExp r1     , RegExp r2     ) -> r1 == r2
-  _                                -> False
-
-terminals :: Parser a -> [Element a]
-terminals (Parser _ _ ps) =
-  let cs = concat [cs | Production _ e css <- ps, Choices _ cs <- css]
-  in nubBy eqTerminal $ concat [[e | e <- es, isTerminal e] | Choice _ _ _ es <- cs]
+terminals :: Parser a -> [Terminal]
+terminals (Parser _ _ ps) = nub $
+  [ t | 
+    Production _ e css <- ps, 
+    Choices _ cs <- css, 
+    Choice _ _ _ es <- cs, 
+    Terminal t <- es
+  ]
 
 ----------------------------------------------------------------
 -- Functions for converting a parser into a UXADT instance string.
@@ -142,20 +155,26 @@ instance U.ToUXADT (Element a) where
     NonTerminal _ n -> U.C "NonTerminal" [U.S n]
     Many e n ms     -> U.C "Many" $ [U.uxadt e, U.I (fromInteger n)] ++ maybe [] (\s -> [U.S s]) ms
     Indented e      -> U.C "Indented" [U.uxadt e]
-    Terminal t      -> U.C "Terminal" [U.S t]
+    Terminal t      -> U.C "Terminal" [U.uxadt t]
+    Error s         -> U.C "Error" [U.S s]
+
+instance U.ToUXADT Terminal where
+  uxadt t = case t of
+    Explicit s      -> U.C "Explicit" [U.S s]
     NewLine         -> U.C "Newline" []
     StringLiteral   -> U.C "StringLiteral" []
     NaturalLiteral  -> U.C "NaturalLiteral" []
     DecimalLiteral  -> U.C "DecimalLiteral" []
+    Identifier      -> U.C "Identifier" []
+    Constructor     -> U.C "Constructor" []
+    Flag            -> U.C "Flag" []
     RegExp r        -> U.C "RegExp" [U.S r]
-    ErrElement s    -> U.C "ErrElement" [U.S s]
 
 ----------------------------------------------------------------
 -- Functions for converting a parser into an ASCII string.
 
 instance Show (Parser a) where
   show (Parser _ _ ps) = join "\n\n" (map show ps) ++ "\n"
-
 
 instance Show (Production a) where
   show (Production a en css) = 
@@ -165,28 +184,34 @@ instance Show (Choices a) where
   show (Choices a cs) = join "\n  " $ map show cs
 
 instance Show (Choice a) where
-  show (PrecedenceSeparator a) = "^"
   show (Choice a c assoc es) = 
     (maybe "" id c) ++ " " ++ show assoc ++ " " ++ (join " " $ map show es)
 
-instance Show (Element a) where
-  show e = case e of
-    NonTerminal _ n -> "`" ++ n
-    Many e n ms     -> "`[" ++ show e ++ "/" ++ show n ++ (maybe "" (\s->"/" ++ show s) ms) ++ "]"
-    Indented e      -> "`>" ++ show e ++ "<"
-    Terminal t      -> t
-    NewLine         -> "`_"
-    StringLiteral   -> "`$"
-    NaturalLiteral  -> "`#"
-    DecimalLiteral  -> "`#.#"
-    RegExp r        -> "`{" ++ r ++ "}"
-    ErrElement s    -> "`!!!(" ++ s ++ ")!!!"
-  
 instance Show Association where
   show a = case a of
     AssocNone  -> "|"
     AssocRight -> ">"
     AssocLeft  -> "<"
     AssocFlat  -> "~"
+
+instance Show (Element a) where
+  show e = case e of
+    NonTerminal _ n -> "`" ++ n
+    Many e n ms     -> "`[" ++ show e ++ "/" ++ show n ++ (maybe "" (\s->"/" ++ show s) ms) ++ "]"
+    Indented e      -> "`>" ++ show e ++ "<"
+    Terminal t      -> show t
+    Error s         -> "`!!!(" ++ s ++ ")!!!"
+
+instance Show Terminal where
+  show t = case t of
+    Explicit s      -> s
+    NewLine         -> "`_"
+    StringLiteral   -> "`$"
+    NaturalLiteral  -> "`#"
+    DecimalLiteral  -> "`#.#"
+    Identifier      -> "`id"
+    Constructor     -> "`con"
+    Flag            -> "`flag"
+    RegExp r        -> "`{" ++ r ++ "}"
 
 --eof

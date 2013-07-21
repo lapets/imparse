@@ -15,43 +15,45 @@ module Text.Imparse.Analysis
 import qualified Data.Map as Map (fromListWith, lookup, Map)
 
 import qualified Text.RichReports as R
+import qualified StaticAnalysis.All as S
 
-import Text.Imparse.AbstractSyntax
+import qualified Text.Imparse.AbstractSyntax as A
 
 ----------------------------------------------------------------
--- Data structure and class.
+-- Analysis data structure and instance declarations.
 
-data Variables =
-    Variables
+data Analysis =
+    Unanalyzed
+  | ParserA [ParserCategory] [NonTerminal] [Initial]
+  | ProductionA [ProductionCategory] [NonTerminal] [Initial]
+  | ChoicesA [ChoicesCategory] [NonTerminal] [Initial]
+  | ChoiceA [ChoiceCategory] [NonTerminal] [Initial]
+  | EntityA [EntityCategory]
+  | Normal
+  | Dup
+  | Unbound
+  | Unsupported
   deriving (Eq, Show)
 
-data NonTerminals =
-    NonTerminals
+data ParserCategory =
+    Recursive
+  | Linear
+  | LeftLinear
+  | RightLinear
+  | CFG
   deriving (Eq, Show)
 
-data Initials =
-    Initials
+data ProductionCategory =
+    ProductionCategory
+  | Unreachable
+  | Duplicate
   deriving (Eq, Show)
 
-data Analysis3 =
-    AP Structure
-  | AC ChoiceKind Structure
-  | ACS ChoicesKind Structure
-  | AE Structure
+data ChoicesCategory =
+    ChoicesCategory
   deriving (Eq, Show)
 
-data Structure =
-  Analysis {
-    variables :: Variables,
-    nonterminals :: NonTerminals,
-    initials :: Initials
-  } deriving (Eq, Show)
-
-data ChoicesKind =
-    ChoicesKind
-  deriving (Eq, Show)
-
-data ChoiceKind =
+data ChoiceCategory =
     ChoiceUnknown
   | ChoiceBase
   | ChoiceRecursivePrefix
@@ -60,24 +62,18 @@ data ChoiceKind =
   | ChoiceOther
   deriving (Eq, Show)
 
-data Analysis =
-    Unanalyzed
-  | Normal
-  | Duplicate
-  | Unbound
-  | Unsupported
+data EntityCategory =
+    EntityCategory
   deriving (Eq, Show)
 
-data Grammar =
-    Recursive
-  | Linear
-  | LeftLinear
-  | RightLinear
-  | CFG
+type NonTerminal = String
+
+data Initial =
+    Initial
   deriving (Eq, Show)
 
-class Analyze a where
-  analyze :: a Analysis -> a Analysis
+instance S.Analysis Analysis where
+  unanalyzed = Unanalyzed
 
 ----------------------------------------------------------------
 -- Reporting of analysis results.
@@ -85,7 +81,7 @@ class Analyze a where
 instance R.ToMessages Analysis where
   messages a = case a of
     Normal -> []
-    Duplicate -> [R.Text "Duplicate."]
+    Dup -> [R.Text "Duplicate."]
     Unbound -> [R.Text "Unbound."]
     Unsupported -> [R.Text "Unsupported."]
     Unanalyzed -> [R.Text "Unanalyzed."]
@@ -94,39 +90,66 @@ instance R.ToHighlights Analysis where
   highlights a = case a of
     Unanalyzed -> [R.HighlightError]
     Normal -> []
-    Duplicate -> [R.HighlightDuplicate]
+    Dup -> [R.HighlightDuplicate]
     Unbound -> [R.HighlightUnbound]
     Unsupported -> [R.HighlightError]
 
 ----------------------------------------------------------------
+-- Collection of non-terminals.
+
+class NonTerminals a where
+  nonterminals :: a -> [NonTerminal]
+
+instance NonTerminals (A.Production a) where
+  nonterminals (A.Production _ e css) = concat $ map nonterminals css
+
+instance NonTerminals (A.Choices a) where
+  nonterminals (A.Choices _ cs) = concat $ map nonterminals cs
+
+instance NonTerminals (A.Choice a) where
+  nonterminals (A.Choice _ mc asc es) = concat $ map nonterminals es
+
+instance NonTerminals (A.Element a) where
+  nonterminals e = case e of
+    A.NonTerminal _ e -> [e]
+    A.Many e m ms -> nonterminals e
+    A.Indented e -> nonterminals e
+    _ -> []
+
+----------------------------------------------------------------
 -- Analysis algorithms.
 
-instance Analyze Parser where
-  analyze (Parser a ims ps) =
+analyze :: A.Parser Analysis -> A.Parser Analysis
+analyze (A.Parser a ims ps) =
     let 
-        productions :: [Production Analysis] -> [Production Analysis]
-        productions ps = 
-          let es = [e | Production _ e _ <- ps]
-          in [Production a e [Choices a (map (choice es) cs) | Choices a cs <- css] | Production a e css <- ps]
+        productions :: [A.Production Analysis] -> [A.Production Analysis]
+        productions ps =
+          let es = [e | A.Production _ e _ <- ps]
+          in
+            [ A.Production a e [A.Choices a (map (choice es) cs) | A.Choices a cs <- css] 
+            | A.Production a e css <- ps
+            ]
 
-        choice es c = case c of
-          Choice a c asc es' -> Choice a c asc (map (element es) es')
-          _                  -> c
+        choice :: [A.NonTerminal] -> A.Choice Analysis -> A.Choice Analysis
+        choice es (A.Choice a c asc es') = A.Choice a c asc (map (element es) es')
 
         element es e = case e of
-          NonTerminal _ e -> NonTerminal (if e `elem` es then Normal else Unbound) e
-          Many e n s      -> Many (element es e) n s
-          Indented e      -> Indented (element es e)
+          A.NonTerminal _ e -> A.NonTerminal (if e `elem` es then Normal else Unbound) e
+          A.Many e n s      -> A.Many (element es e) n s
+          A.Indented e      -> A.Indented (element es e)
           _ -> e
 
         -- Check for duplicate productions.
-        m = Map.fromListWith (+) [(e,1) | Production _ e _ <- ps]
-        chk e = case Map.lookup e m of Just n -> if n > 1 then Duplicate else Normal ; _ -> Unanalyzed
-        ps' = [Production (chk e) e cs | Production _ e cs <- ps]
+        m = Map.fromListWith (+) [(e,1) | A.Production _ e _ <- ps]
+        chk e = case Map.lookup e m of Just n -> if n > 1 then Dup else Normal ; _ -> Unanalyzed
+        ps' = [A.Production (chk e) e cs | A.Production _ e cs <- ps]
 
         -- Check that all entities are bound.
         ps'' = productions ps'
 
-    in Parser a ims ps''
+    in A.Parser a ims ps''
+
+
+
 
 --eof
