@@ -32,16 +32,19 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Production a) where
       R.Line [] [R.Space],
       R.C R.Variable (R.highlights a) (R.messages a) e, R.Text "::=",
       R.BlockIndent [] [] [
-        R.Table [
-          R.Intersperse 
-            (R.Row [R.Field (R.Conc []), R.Field (R.Text "^"), R.Field (R.Conc [])]) 
-            [R.report cs | cs <- css]
-        ]
+        R.Table [ R.report cs | cs <- css ]
       ]
     ]
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choices a) where
-  report (Choices a cs) = R.Conc [R.report c | c <- cs]
+  report (Choices a cs) = 
+    R.Conc $ 
+      [R.report c | c <- cs] ++ 
+      [R.Row [
+        R.Field (R.Conc []), 
+        R.Field (R.Atom (R.highlights a) (R.messages a) [R.Text "^"]), 
+        R.Field (R.Conc [])]
+      ]
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
   report (Choice a c asc es) =
@@ -53,15 +56,20 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
   report r = case r of
-    NonTerminal a n -> R.var_ (R.highlights a) (R.messages a) $ "`" ++ n
-    Many e n ms     -> 
+    NonTerminal a n        -> R.var_ (R.highlights a) (R.messages a) $ "`" ++ n
+    Many e n ms            -> 
       R.Span [] [] $ 
            [ R.key "`[", R.report e, R.key "/", R.Text (show n) ]
         ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
         ++ [R.key "]"]
-    Indented e      -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
-    Terminal t      -> R.report t
-    Error s         -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
+    Indented (Many e n ms) ->
+      R.Span [] [] $ 
+           [ R.key "`>[", R.report e, R.key "/", R.Text (show n) ]
+        ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
+        ++ [R.key "]<"]
+    Indented e             -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
+    Terminal t             -> R.report t
+    Error s                -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
 
 instance R.ToReport Terminal where
   report t = case t of

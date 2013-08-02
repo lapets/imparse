@@ -131,6 +131,9 @@ terminals (Parser _ _ ps) = nub $
     Terminal t <- es
   ]
 
+productionNonTerminal :: Production a -> NonTerminal
+productionNonTerminal (Production _ nt _) = nt
+
 ----------------------------------------------------------------
 -- Functions for converting a parser into a UXADT instance string.
 

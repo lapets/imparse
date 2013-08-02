@@ -75,8 +75,9 @@ parseElement t =
     '`':'>':'[':s -> 
       if length s > 1 && (reverse s)!!1 == ']' && (reverse s)!!0 == '<' then
         case splitOn "/" (take (length s - 2) s) of
-          [s,n,sep] -> Many (NonTerminal A.unanalyzed s) (read n) (Just sep)
-          [s,n]     -> Many (NonTerminal A.unanalyzed s) (read n) Nothing
+          [s,n,sep] -> Indented $ Many (NonTerminal A.unanalyzed s) (read n) (Just sep)
+          [s,n]     -> Indented $ Many (NonTerminal A.unanalyzed s) (read n) Nothing
+          [s]       -> Indented $ Many (NonTerminal A.unanalyzed s) 0 Nothing
           _ -> Error t
       else
         Error t

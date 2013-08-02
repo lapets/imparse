@@ -1,6 +1,6 @@
 
 Usage:
 
-  imparse [-html] [-ascii] [-uxadt] [-hs] path/file.p
+  imparse [-html] [-ascii] [-uxadt] [-hs Prefix] path/file.p
 
 Flags:

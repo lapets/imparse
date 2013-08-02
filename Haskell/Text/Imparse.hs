@@ -18,7 +18,7 @@ module Text.Imparse
 import Data.Char (toUpper)
 import Data.List (splitAt, elemIndex)
 import Data.ByteString.Char8 (unpack)
-import Data.FileEmbed
+import Data.FileEmbed (embedFile)
 import System.Directory (createDirectory, removeDirectoryRecursive, doesDirectoryExist, doesFileExist, removeFile)
 import System.Environment (getArgs)
 import System.IO ()
@@ -100,6 +100,13 @@ removeIfExists file = removeFile file `catch` handleExists
 fileNamePrefix :: String -> String
 fileNamePrefix s = fst $ splitAt (maybe (length s) id (elemIndex '.' s)) s
 
+fileNameDir :: String -> String
+fileNameDir s = 
+  if '/' `elem` s then
+    (fst $ splitAt (maybe (length s) id (elemIndex '/' s)) s) ++ "/"
+  else
+    ""
+
 writeAndPutStr :: String -> String -> String -> IO ()
 writeAndPutStr file ext s =
   do { writeFile (file++"."++ext) s
@@ -115,7 +122,7 @@ procWrite outs fname =
          Nothing -> return ()
          Just parser ->
            do { parser <- return $ analyze parser
-              ; fname <- return $ fileNamePrefix fname
+              ; (fname, fdir) <- return $ (fileNamePrefix fname, fileNameDir fname)
               ; putStr "\n"
 
               ; if HTML `elem` outs then
@@ -137,9 +144,9 @@ procWrite outs fname =
                   Nothing  -> do nothing
                   Just pre ->
                     do moduleName <- return $ (\(c:cs) -> toUpper c : cs) fname
-                       writeAndPutStr "AbstractSyntax" "hs" (C.extract (toAbstractSyntax pre parser) "")
-                       writeAndPutStr "Report" "hs" (C.extract (toRichReport pre parser) "")
-                       writeAndPutStr "Parse" "hs" (C.extract (toParsec pre parser) "")
+                       writeAndPutStr (fdir ++ "AbstractSyntax") "hs" (C.extract (toAbstractSyntax pre parser) "")
+                       writeAndPutStr (fdir ++ "Report") "hs" (C.extract (toRichReport pre parser) "")
+                       writeAndPutStr (fdir ++ "Parse") "hs" (C.extract (toParsec pre parser) "")
 
               }
      }
