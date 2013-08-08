@@ -1,5 +1,5 @@
 Name:              imparse
-Version:           0.0.0.1
+Version:           0.0.0.3
 Cabal-Version:     >= 1.6
 License:           GPL-3
 License-File:      LICENSE
@@ -11,14 +11,18 @@ Maintainer:        Andrei Lapets <lapets@bu.edu>
 Build-Type:        Simple
 
 Library
-  Exposed-Modules: Text.Imparse
+  Exposed-Modules: Text.Imparse,
+                   Text.Imparse.AbstractSyntax,
+                   Text.Imparse.Analysis,
+                   Text.Imparse.Parse,
+                   Text.Imparse.Report,
+                   Text.Imparse.Compile.Haskell
   Build-Depends:   base >= 3 && < 5,
                    MissingH,
-                   bytestring == 0.9.2.1,
                    containers == 0.4.2.1,
-                   text == 0.11.2.3, split,
+                   text == 0.11.2.3, 
+                   split,
                    directory,
-                   file-embed,
                    staticanalysis,
                    compilation,
                    ascetic,
@@ -29,11 +33,10 @@ Executable imparse
   Main-Is:         Main.hs
   Build-Depends:   base >= 3 && < 5,
                    MissingH,
-                   bytestring == 0.9.2.1,
                    containers == 0.4.2.1,
-                   text == 0.11.2.3, split,
+                   text == 0.11.2.3, 
+                   split,
                    directory,
-                   file-embed,
                    staticanalysis,
                    compilation,
                    ascetic,

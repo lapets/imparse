@@ -1,6 +1,0 @@
-
-Usage:
-
-  imparse [-html] [-ascii] [-uxadt] [-hs Prefix] path/file.p
-
-Flags:

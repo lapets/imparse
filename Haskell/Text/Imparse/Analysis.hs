@@ -59,7 +59,6 @@ data Tag =
   | ChoiceRecursive
   | ChoiceRecursivePrefix
   | ChoiceRecursiveInfix
-  | ChoiceIndentedSuffix
   | ChoiceConstructorDuplicate
   | NonTerminalUnbound
   deriving (Eq, Show)
@@ -131,7 +130,6 @@ instance R.ToMessages Tag where
     ChoiceRecursive             -> [R.Text "Recursive"]
     ChoiceRecursivePrefix       -> [R.Text "RecursivePrefix"]
     ChoiceRecursiveInfix        -> [R.Text "RecursiveInfix"]
-    ChoiceIndentedSuffix        -> [R.Text "IndentedSuffix"]
     ChoiceConstructorDuplicate  -> [R.Text "ConstructorDuplicate"]
     NonTerminalUnbound          -> [R.Text "Unbound"]
     _ -> []
@@ -166,13 +164,15 @@ baseline (A.Parser a ims ps) = A.Parser (Analyzed [] r) ims ps' where
 
   nonterminals e = case e of
     A.NonTerminal _ e -> [e]
-    A.Many e m ms     -> nonterminals e
+    A.Many e ms       -> nonterminals e
+    A.May e           -> nonterminals e
     _                 -> []
 
   reachable e = case e of
     A.NonTerminal _ e -> [e]
-    A.Many e m ms     -> reachable e
-    A.Indented e      -> reachable e
+    A.Many e ms       -> reachable e
+    A.May e           -> reachable e
+    A.Indented w e    -> reachable e
     _                 -> []
 
 closure :: A.Parser Analysis -> A.Parser Analysis
@@ -182,9 +182,15 @@ closure (A.Parser a ims ps) = A.Parser a ims ps'' where
         [ let cs' =
                 [ let es' =
                         [ let sub e = case e of
-                                A.NonTerminal _ e -> A.NonTerminal (Analyzed [] (head $ concat $ map (lookP e) ps')) e
-                                A.Many e m ms     -> A.Many (sub e) m ms
-                                A.Indented e      -> A.Indented (sub e)
+                                A.NonTerminal _ e -> 
+                                  A.NonTerminal (
+                                        let l = concat $ map (lookP e) ps' 
+                                        in if length l > 0 then (Analyzed [] (head l)) else S.unanalyzed
+                                      )
+                                      e
+                                A.Many e ms       -> A.Many (sub e) ms
+                                A.May e           -> A.May (sub e)
+                                A.Indented w e    -> A.Indented w (sub e)
                                 _                 -> e
                           in sub e
                         | e <- es 
@@ -212,7 +218,6 @@ closure (A.Parser a ims ps) = A.Parser a ims ps'' where
   lookTs es (A.Production (Analyzed _ (ts, ns, rs)) e _) = if e `elem` es then ts else []
   lookP e' (A.Production (Analyzed _ c) e _) = if e == e' then [c] else []
 
-
 ----------------------------------------------------------------
 -- Property derivation and tagging algorithms.
 
@@ -225,7 +230,7 @@ tagging (A.Parser a ims ps) = A.Parser a ims (map production ps) where
         ++ (if and [ChoicesNonRecursive `elem` tags cs | cs <- css'] then [ProductionNonRecursive] else [])
         ++ (if or [ChoicesRecursive `elem` tags cs | cs <- css'] then [ProductionRecursive] else [])
         ++ (if or [ChoicesRecursive `elem` tags cs | cs <- css'] then [ProductionRecursive] else [])
-        ++ (let pat [ts]     = ChoicesDeterministic `elem` ts
+        ++ (let pat [ts]     = ChoicesDeterministic `elem` ts || ChoicesNonRecursive `elem` ts
                 pat (ts:tss) = ChoicesRecursivePrefixInfix `elem` ts && pat tss
             in if length css' > 1 && pat [tags cs | cs <- css'] then [ProductionInfixPrefixThenDeterministic] else []
            )
@@ -257,18 +262,6 @@ tagging (A.Parser a ims ps) = A.Parser a ims (map production ps) where
                  if nt1 == e && nt2 == e && isJust mc then [ChoiceRecursiveInfix] else []
                _ -> []
             )
-         ++ (let chkTerm e = case e of A.Terminal _ -> True ; _ -> False
-                 chkNotIndented e = case e of A.Indented _ -> False ; _ -> True
-                 chkLast e = case e of A.Indented (A.Many _ _ _) -> True ; _ -> False
-             in if  ( length es > 1 
-                   && and (map chkNotIndented (init es))
-                   && or (map chkTerm (init es))
-                   && chkLast (last es)
-                    ) then
-                    [ChoiceIndentedSuffix] 
-                  else 
-                    []
-            )
 
 analyze :: A.Parser Analysis -> A.Parser Analysis
 analyze parser =
@@ -288,8 +281,9 @@ analyze parser =
 
         element es e = case e of
           A.NonTerminal a e -> A.NonTerminal (tag a $ if e `elem` es then [] else [NonTerminalUnbound]) e
-          A.Many e n s      -> A.Many (element es e) n s
-          A.Indented e      -> A.Indented (element es e)
+          A.Many e s        -> A.Many (element es e) s
+          A.May e           -> A.May (element es e)
+          A.Indented w e    -> A.Indented w (element es e)
           _ -> e
 
         -- Check for duplicate productions non-terminal names.
@@ -318,5 +312,24 @@ analyze parser =
         ps''' = productions ps''
 
     in A.Parser a ims ps'''
+
+----------------------------------------------------------------
+-- Other useful functions.
+
+infixPrefixOps :: A.Parser Analysis -> [String]
+infixPrefixOps (A.Parser _ _ ps) = 
+  nub $ 
+       [op | 
+         A.Production _ e css <- ps, 
+         A.Choices _ cs <- css, 
+         c@(A.Choice _ _ _ [A.Terminal (A.Explicit op), A.NonTerminal _ nt]) <- cs,
+         ChoiceRecursivePrefix `elem` tags c
+       ]
+    ++ [op | 
+         A.Production _ e css <- ps, 
+         A.Choices _ cs <- css, 
+         c@(A.Choice _ _ _ [A.NonTerminal _ nt1, A.Terminal (A.Explicit op), A.NonTerminal _ nt2]) <- cs,
+         ChoiceRecursiveInfix `elem` tags c
+       ]
 
 --eof

@@ -10,15 +10,11 @@
 ----------------------------------------------------------------
 -- Useful functions for the imparser parser generator.
 
-{-# LANGUAGE TemplateHaskell #-}
-
 module Text.Imparse
   where
 
 import Data.Char (toUpper)
 import Data.List (splitAt, elemIndex)
-import Data.ByteString.Char8 (unpack)
-import Data.FileEmbed (embedFile)
 import System.Directory (createDirectory, removeDirectoryRecursive, doesDirectoryExist, doesFileExist, removeFile)
 import System.Environment (getArgs)
 import System.IO ()
@@ -27,7 +23,7 @@ import System.IO.Error hiding (catch)
 import Control.Exception (throwIO, catch)
 
 import qualified Control.Compilation.Compile as C
-import qualified Text.UXADT as U (uxadt, javaScriptModule)
+import qualified Text.UxADT as U (uxadt, javaScriptModule)
 import Text.RichReports (report)
 import Text.Ascetic.HTML (html)
 
@@ -152,7 +148,11 @@ procWrite outs fname =
      }
 
 usage :: IO ()
-usage = putStr $ unpack $(embedFile "Text/Imparse/usage")
+usage = putStr $
+     "\nUsage:\n\n"
+  ++ "  imparse [optional flags] path/file.p\n\n"
+  ++ "Flags:\n\n"
+  ++ ""
 
 cmd :: [OutputTarget] -> [String] -> IO ()
 cmd [] []            = usage

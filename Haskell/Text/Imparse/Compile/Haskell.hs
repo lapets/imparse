@@ -15,6 +15,7 @@ module Text.Imparse.Compile.Haskell
   where
 
 import Data.Char (toLower)
+import Data.List (nub, (\\))
 import Data.String.Utils (join, replace)
 import Data.Maybe (catMaybes)
 import Control.Compilation.Compile
@@ -83,15 +84,19 @@ toDatatype (Parser _ _ ps) =
       element :: Element a -> Compile String ()
       element e = case e of
         NonTerminal _ entity -> do { raw " "; raw entity }
-        Many e _ _           -> do { raw " ["; elementNoSp e; raw "]" }
-        Indented e           -> element e
+        Many e _             -> do { raw " ["; elementNoSp e; raw "]" }
+        May (Many e _)       -> do { raw " ["; elementNoSp e; raw "]" }
+        May e                -> do { raw " (Maybe "; elementNoSp e; raw ")" }
+        Indented w e         -> element e
         Terminal t           -> do { raw " "; terminal t }
         _                    -> do nothing
 
       elementNoSp :: Element a -> Compile String ()
       elementNoSp e = case e of
         NonTerminal _ entity -> do { raw entity }
-        Many e _ _           -> do { raw "["; element e; raw "]" }
+        Many e  _            -> do { raw "["; element e; raw "]" }
+        May (Many e _)       -> do { raw "["; element e; raw "]" }
+        May e                -> do { raw "(Maybe "; elementNoSp e; raw ")" }
         _                    -> element e
 
       terminal :: Terminal -> Compile String ()
@@ -161,17 +166,21 @@ toReportFuns (Parser _ _ ps) =
 
       element :: (String, Element a) -> Maybe String
       element (v,e) = case e of
-        NonTerminal _ entity   -> Just $ "R.report " ++ v
-        Many e' _ _            -> element (v,e')
-        Indented (Many e' _ _) -> maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [R.Line [] [R.report vx] | vx <- " ++ v ++ "]") $ element (v,e')
-        Indented e'            -> maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [" ++ r ++ "]") $ element (v,e')
-        Terminal t             -> Just $ terminal v t
-        _                      -> Nothing
+        NonTerminal _ entity         -> Just $ "R.report " ++ v
+        Many e' _                    -> element (v,e')
+        May e'                       -> element (v,e')
+        Indented w (May (Many e' _)) -> 
+          maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [R.Line [] [R.report vx] | vx <- " ++ v ++ "]") $ element (v,e')
+        Indented w (Many e' _)       ->
+          maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [R.Line [] [R.report vx] | vx <- " ++ v ++ "]") $ element (v,e')
+        Indented w e'                -> 
+          maybe Nothing (\r -> Just $ "R.BlockIndent [] [] $ [" ++ r ++ "]") $ element (v,e')
+        Terminal t                   -> Just $ terminal v t
+        _                            -> Nothing
 
       terminal :: String -> Terminal -> String
       terminal v t = case t of
         Explicit s     -> "R.key \"" ++ s ++ "\""
-        NewLine        -> "R.Line [] []"
         StringLiteral  -> "R.lit " ++ v
         NaturalLiteral -> "R.lit (show " ++ v ++ ")"
         DecimalLiteral -> "R.lit " ++ v
@@ -195,11 +204,13 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      raw $ "import " ++ prefix ++ "AbstractSyntax"
      newlines 2
 
-     -- template <- return $ replace "\n\n" "\n" $ replace "\r" "" $ unpack $(embedFile "Text/Imparse/Compile/parsec.template")
+     reservedOpNames <- return $ nub $ S.infixPrefixOps p
+     opLetters <- return $ nub $ concat reservedOpNames
+     reservedNames <- return $ (nub [r | Explicit r <- terminals p]) \\ reservedOpNames
 
      raw "----------------------------------------------------------------\n-- Parser to convert concrete syntax to abstract syntax.\n\n"
      raw "import Text.Parsec\n"
-     raw "import qualified Text.Parsec.Indent as PI (withBlock, runIndent)\n"
+     raw "import qualified Text.Parsec.Indent as PI (runIndent, indented, block)\n"
      raw "import qualified Text.Parsec.Token as PT\n"
      raw "import qualified Text.Parsec.Expr as PE\n"
      raw "import qualified Text.ParserCombinators.Parsec.Language as PL\n"
@@ -218,24 +229,28 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      raw "  { PL.identStart        = oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmlnopqrstuvwxyz_\" -- Only lowercase.\n"
      raw "  , PL.identLetter       = alphaNum <|> oneOf \"_'\"\n"
      raw "  , PL.opStart           = PL.opLetter langDef\n"
-     raw "  , PL.opLetter          = oneOf \"\"\n"
-     raw "  , PL.reservedOpNames   = [ ]\n"
-     raw "  , PL.reservedNames     = [ ]\n"
+     raw $ "  , PL.opLetter          = oneOf \"" ++ opLetters ++ "\"\n"
+     raw $ "  , PL.reservedOpNames   = [" ++ join "," ["\"" ++ rO ++ "\"" | rO <- reservedOpNames] ++ "]\n"
+     raw $ "  , PL.reservedNames     = [" ++ join "," ["\"" ++ rO ++ "\"" | rO <- reservedNames] ++ "]\n"
      raw "  , PL.commentLine       = \"#\"\n"
-     raw "  }\n\n"
+     raw "  }"
+     newlines 2
      raw "lang :: PT.GenTokenParser [Char] () ParseState\n"
-     raw "lang = PT.makeTokenParser langDef\n\n"
+     raw "lang = PT.makeTokenParser langDef"
+     newlines 2
      raw "whiteSpace = PT.whiteSpace lang\n"
      raw "symbol     = PT.symbol lang\n"
      raw "rO         = PT.reservedOp lang\n"
      raw "res        = PT.reserved lang\n"
      raw "identifier = PT.identifier lang\n"
-     raw "natural    = PT.natural lang\n\n"
+     raw "natural    = PT.natural lang"
+     newlines 2
      raw "binary name f assoc = PE.Infix (do{PT.reservedOp lang name; return f}) assoc\n"
-     raw "prefix name f       = PE.Prefix (do{PT.reservedOp lang name; return f})\n\n"
-     raw "withIndent p1 p2 f = PI.withBlock f p1 p2\n\n"
+     raw "prefix name f       = PE.Prefix (do{PT.reservedOp lang name; return f})"
+     newlines 2
      raw "con :: ParseFor String\n"
-     raw "con = do { c <- oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\" ; cs <- option \"\" identifier ; return $ c:cs }\n\n"
+     raw "con = do { c <- oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\" ; cs <- option \"\" identifier ; return $ c:cs }"
+     newlines 2
      raw "flag :: ParseFor String\n"
      raw "flag = do { cs <- many1 (oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\") ; return cs }\n"
      raw "-- caps = do { cs <- many1 (oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\") ; return cs }\n\n"
@@ -301,22 +316,6 @@ toParsecDefs (Parser _ _ ps) =
 
       choice :: Choice S.Analysis -> Compile String ()
       choice (c@(Choice _ con _ es)) =
-        if S.ChoiceIndentedSuffix `elem` S.tags c then
-          do ves <- return $ init [("v" ++ show k, es!!k) | k <- [0..length es-1]]
-             con <-
-                case con of
-                   Nothing  -> do { c <- fresh; return $ "C" ++ c }
-                   Just con -> return con
-             nt <- return $ (\(Indented (Many (NonTerminal _ nt) _ _)) -> nt) $ last es
-             raw $ "withIndent ("
-             raw "do {"
-             raw $ join "; " (map element ves)
-             raw "; "
-             raw $ "return $ (" ++ join ", " (catMaybes (map arg ves)) ++ ")"
-             raw "}) "
-             raw $ "p" ++ nt
-             raw $ " (\\(" ++ (join ", " $ catMaybes (map arg ves)) ++ ") vs -> " ++ con ++ " " ++ join " " (catMaybes (map arg ves)) ++ " vs)"
-        else
           do ves <- return $ [("v" ++ show k, es!!k) | k <- [0..length es-1]]
              con <-
                 case con of
@@ -329,29 +328,33 @@ toParsecDefs (Parser _ _ ps) =
              raw "}"
 
       element :: (String, Element S.Analysis) -> String
-      element (v, e) = case e of
-        NonTerminal _ nt            -> v ++ " <- p" ++ nt
-        Many (NonTerminal _ nt) n sep ->
-          let cmbSuffix = if n == 0 then "" else "1"
-              comb = maybe "many" (\_ -> "sepBy") sep
-              suffix = maybe "" (\sep -> " (res \" ++ sep ++ \")") sep
-          in v ++ " <- " ++ comb ++ cmbSuffix ++ " p" ++ nt ++ suffix
-        Indented e'                 -> ""
-        Terminal t                  -> terminal v t
-        _                           -> ""
+      element (v, e) = 
+        let mkP e = case e of
+              NonTerminal _ nt                -> "p" ++ nt
+              Many e' Nothing                 -> "(many1 (" ++ mkP e' ++ "))"
+              Many e' (Just sep)              -> "(sepBy1 " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              May (Many e' Nothing)           -> "(many (" ++ mkP e' ++ "))"
+              May (Many e' (Just sep))        -> "(sepBy " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              May e'                          -> "(option (" ++ mkP e' ++ "))"
+              Indented False e'               -> mkP e'
+              Indented True (Many e' Nothing) -> "(PI.indented >> PI.block (" ++ mkP e' ++ "))"
+              _                        -> ""
+        in case e of
+          Terminal t -> terminal v t
+          _ -> case mkP e of "" -> "" ; p -> v ++ " <- " ++ p
 
       arg :: (String, Element S.Analysis) -> Maybe String
       arg (v, e) = case e of
         NonTerminal _ nt -> Just v
-        Many e' _ _      -> Just v
-        Indented e'      -> Just v
+        Many e' _        -> Just v
+        May e'           -> Just v
+        Indented _ e'    -> Just v
         Terminal t       -> argT v t
         _                -> Nothing
 
       argT :: String -> Terminal -> Maybe String
       argT v t = case t of
         Explicit s     -> Nothing
-        NewLine        -> Nothing
         StringLiteral  -> Just v
         NaturalLiteral -> Just v
         DecimalLiteral -> Just v
@@ -363,7 +366,6 @@ toParsecDefs (Parser _ _ ps) =
       terminal :: String -> Terminal -> String
       terminal v t = case t of
         Explicit s     -> "res \"" ++ s ++ "\""
-        NewLine        -> "whiteSpace"
         StringLiteral  -> v ++ " <- literal"
         NaturalLiteral -> v ++ " <- natural"
         DecimalLiteral -> v ++ " <- decimal"

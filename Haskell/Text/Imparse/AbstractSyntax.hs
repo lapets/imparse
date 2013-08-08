@@ -16,7 +16,7 @@ import Data.String.Utils (join)
 import Data.List (nub)
 
 import qualified Text.RichReports as R
-import qualified Text.UXADT as U
+import qualified Text.UxADT as U
 import qualified StaticAnalysis.All as A
 
 ----------------------------------------------------------------
@@ -25,6 +25,7 @@ import qualified StaticAnalysis.All as A
 type Import = String
 type NonTerminal = String
 type Constructor = String
+type WhitespaceParse = Bool
 
 data Parser a =
     Parser a [Import] [Production a]
@@ -56,15 +57,15 @@ data Association =
 
 data Element a =
     NonTerminal a NonTerminal
-  | Many (Element a) Minimum (Maybe Separator)
-  | Indented (Element a)
+  | Many (Element a) (Maybe Separator)
+  | May (Element a)
+  | Indented WhitespaceParse (Element a)
   | Terminal Terminal
   | Error String
   deriving Eq
 
 data Terminal =
     Explicit String
-  | NewLine
   | StringLiteral
   | NaturalLiteral
   | DecimalLiteral
@@ -96,14 +97,16 @@ instance A.Annotated Choice where
 instance A.Annotated Element where
   annotate e a = case e of
     NonTerminal _ e -> NonTerminal a e
-    Many e m ms -> Many (A.annotate e a) m ms
-    Indented e -> Indented $ A.annotate e a
+    Many e ms       -> Many (A.annotate e a) ms
+    May e           -> May (A.annotate e a)
+    Indented w e    -> Indented w $ A.annotate e a
     _ -> e
   annotation e = case e of
     NonTerminal a _ -> a
-    Many e _ _ -> A.annotation e
-    Indented e -> A.annotation e
-    _ -> A.unanalyzed
+    Many e _        -> A.annotation e
+    May e           -> A.annotation e
+    Indented w e    -> A.annotation e
+    _               -> A.unanalyzed
 
 ----------------------------------------------------------------
 -- Functions for inspecting parser instances.
@@ -111,8 +114,9 @@ instance A.Annotated Element where
 isData :: Element a -> Bool
 isData e = case e of
   NonTerminal _ _         -> True
-  Many _ _ _              -> True
-  Indented _              -> True
+  Many _ _                -> True
+  May _                   -> True
+  Indented _ _            -> True
   Terminal StringLiteral  -> True
   Terminal NaturalLiteral -> True
   Terminal DecimalLiteral -> True
@@ -120,16 +124,12 @@ isData e = case e of
   Terminal Constructor    -> True
   Terminal Flag           -> True
   Terminal (RegExp _)     -> True
-  _               -> False
+  _                       -> False
 
 terminals :: Parser a -> [Terminal]
-terminals (Parser _ _ ps) = nub $
-  [ t | 
-    Production _ e css <- ps, 
-    Choices _ cs <- css, 
-    Choice _ _ _ es <- cs, 
-    Terminal t <- es
-  ]
+terminals (Parser _ _ ps) =
+  nub $ 
+    [t | Production _ e css <- ps, Choices _ cs <- css, Choice _ _ _ es <- cs, Terminal t <- es]
 
 productionNonTerminal :: Production a -> NonTerminal
 productionNonTerminal (Production _ nt _) = nt
@@ -137,34 +137,34 @@ productionNonTerminal (Production _ nt _) = nt
 ----------------------------------------------------------------
 -- Functions for converting a parser into a UXADT instance string.
 
-instance U.ToUXADT (Parser a) where
+instance U.ToUxADT (Parser a) where
   uxadt (p@(Parser _ _ ps)) = 
     U.C "Parser" [
       U.C "Productions" [U.L [U.uxadt p | p <- ps]],
       U.C "Terminals" [U.L [U.uxadt t | t <- terminals p]]
     ]
 
-instance U.ToUXADT (Production a) where
+instance U.ToUxADT (Production a) where
   uxadt (Production _ en css) = U.C "Production" [U.S en, U.uxadt css]
 
-instance U.ToUXADT (Choices a) where
+instance U.ToUxADT (Choices a) where
   uxadt (Choices _ cs) = U.C "Choices" [U.uxadt c | c <- cs]
 
-instance U.ToUXADT (Choice a) where
+instance U.ToUxADT (Choice a) where
   uxadt (Choice _ c _ es) = U.C "Choice" [maybe U.None U.S c, U.uxadt es]
 
-instance U.ToUXADT (Element a) where
+instance U.ToUxADT (Element a) where
   uxadt e = case e of
     NonTerminal _ n -> U.C "NonTerminal" [U.S n]
-    Many e n ms     -> U.C "Many" $ [U.uxadt e, U.I (fromInteger n)] ++ maybe [] (\s -> [U.S s]) ms
-    Indented e      -> U.C "Indented" [U.uxadt e]
+    Many e ms       -> U.C "Many" $ [U.uxadt e] ++ maybe [] (\s -> [U.S s]) ms
+    May e           -> U.C "May" [U.uxadt e]
+    Indented w e    -> U.C "Indented" [U.uxadt w, U.uxadt e]
     Terminal t      -> U.C "Terminal" [U.uxadt t]
     Error s         -> U.C "Error" [U.S s]
 
-instance U.ToUXADT Terminal where
+instance U.ToUxADT Terminal where
   uxadt t = case t of
     Explicit s      -> U.C "Explicit" [U.S s]
-    NewLine         -> U.C "Newline" []
     StringLiteral   -> U.C "StringLiteral" []
     NaturalLiteral  -> U.C "NaturalLiteral" []
     DecimalLiteral  -> U.C "DecimalLiteral" []
@@ -198,17 +198,19 @@ instance Show Association where
     AssocFlat  -> "~"
 
 instance Show (Element a) where
-  show e = case e of
-    NonTerminal _ n -> "`" ++ n
-    Many e n ms     -> "`[" ++ show e ++ "/" ++ show n ++ (maybe "" (\s->"/" ++ show s) ms) ++ "]"
-    Indented e      -> "`>" ++ show e ++ "<"
-    Terminal t      -> show t
-    Error s         -> "`!!!(" ++ s ++ ")!!!"
+  show (Terminal t) = show t
+  show (Error s)    = "`!!!_" ++ s ++ "_!!!"
+  show e            = 
+    let rec e = case e of
+          NonTerminal _ nt -> nt
+          Many e ms        -> "[" ++ rec e ++ (maybe "" (\s->"/" ++ show s) ms) ++ "]"
+          May e            -> "(" ++ rec e ++ ")"
+          Indented w e     -> if w then ">>" ++ rec e ++ "<<" else ">" ++ rec e ++ "<"
+    in "`" ++ rec e
 
 instance Show Terminal where
   show t = case t of
     Explicit s      -> s
-    NewLine         -> "`_"
     StringLiteral   -> "`$"
     NaturalLiteral  -> "`#"
     DecimalLiteral  -> "`#.#"

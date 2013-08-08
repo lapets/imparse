@@ -55,30 +55,33 @@ instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Choice a) where
       ]
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Element a) where
-  report r = case r of
-    NonTerminal a n        -> R.var_ (R.highlights a) (R.messages a) $ "`" ++ n
-    Many e n ms            -> 
-      R.Span [] [] $ 
-           [ R.key "`[", R.report e, R.key "/", R.Text (show n) ]
-        ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
-        ++ [R.key "]"]
-    Indented (Many e n ms) ->
-      R.Span [] [] $ 
-           [ R.key "`>[", R.report e, R.key "/", R.Text (show n) ]
-        ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
-        ++ [R.key "]<"]
-    Indented e             -> R.Span [] [] [R.key "`>", R.report e, R.key "<"]
-    Terminal t             -> R.report t
-    Error s                -> R.err_ [R.HighlightError] [] $ "`!!!(" ++ s ++ ")!!!"
+  report (Terminal t) = R.report t
+  report (Error s)    = R.err_ [R.HighlightError] [] $ "`!!!_" ++ s ++ "_!!!"
+  report r = 
+    let rec d r = 
+          let bq = if d > 0 then "" else "`"
+          in case r of
+               NonTerminal a nt -> R.var_ (R.highlights a) (R.messages a) $ bq ++ nt
+               Many e ms -> 
+                 R.Span [] [] $ 
+                     [ R.key (bq ++ "["), rec (d+1) e ]
+                   ++ (maybe [] (\s -> [R.key "/", R.lit s]) ms) 
+                   ++ [R.key "]"]
+               May e -> R.Span [] [] $ [ R.key (bq ++ "("), rec (d+1) e ] ++ [R.key ")"]
+               Indented w e ->
+                 if w then
+                   R.Span [] [] [R.key (bq ++ ">"), R.report e, R.key "<"]
+                 else
+                   R.Span [] [] [R.key (bq ++ ">>"), R.report e, R.key "<<"]
+    in rec 0 r
 
 instance R.ToReport Terminal where
   report t = case t of
     Explicit s     -> R.lit s
-    NewLine        -> R.key "`_"
     StringLiteral  -> R.key "`$"
     NaturalLiteral -> R.key "`#"
     DecimalLiteral -> R.key "`#.#"
-    Identifier     -> R.key "`id"
+    Identifier     -> R.key "`var"
     Constructor    -> R.key "`con"
     Flag           -> R.key "`flag"
     RegExp r       -> R.Span [] [] [R.key "`{", R.Text r, R.key "}"]
