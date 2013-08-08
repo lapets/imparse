@@ -17,3 +17,9 @@ Stmt ::=
 
 Stmt ::=
      Return | return
+
+Unreach1 ::=
+     UnTest1 | unreach `Unreach2
+
+Unreach2 ::=
+     UnTest2 | reach

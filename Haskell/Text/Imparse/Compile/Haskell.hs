@@ -210,7 +210,7 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
 
      raw "----------------------------------------------------------------\n-- Parser to convert concrete syntax to abstract syntax.\n\n"
      raw "import Text.Parsec\n"
-     raw "import qualified Text.Parsec.Indent as PI (runIndent, indented, block)\n"
+     raw "import qualified Text.Parsec.Indent as PI (runIndent, checkIndent, withPos, indented, block)\n"
      raw "import qualified Text.Parsec.Token as PT\n"
      raw "import qualified Text.Parsec.Expr as PE\n"
      raw "import qualified Text.ParserCombinators.Parsec.Language as PL\n"
@@ -226,13 +226,13 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      raw "----------------------------------------------------------------\n-- Parsec-specific configuration definitions and synonyms.\n\n"
      raw "langDef :: PL.GenLanguageDef String () ParseState\n"
      raw "langDef = PL.javaStyle\n"
-     raw "  { PL.identStart        = oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmlnopqrstuvwxyz_\" -- Only lowercase.\n"
-     raw "  , PL.identLetter       = alphaNum <|> oneOf \"_'\"\n"
-     raw "  , PL.opStart           = PL.opLetter langDef\n"
+     raw $ "  { PL.identStart        = oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmlnopqrstuvwxyz_\" -- Only lowercase.\n"
+     raw $ "  , PL.identLetter       = alphaNum <|> oneOf \"_'\"\n"
+     raw $ "  , PL.opStart           = PL.opLetter langDef\n"
      raw $ "  , PL.opLetter          = oneOf \"" ++ opLetters ++ "\"\n"
      raw $ "  , PL.reservedOpNames   = [" ++ join "," ["\"" ++ rO ++ "\"" | rO <- reservedOpNames] ++ "]\n"
      raw $ "  , PL.reservedNames     = [" ++ join "," ["\"" ++ rO ++ "\"" | rO <- reservedNames] ++ "]\n"
-     raw "  , PL.commentLine       = \"#\"\n"
+     raw $ "  , PL.commentLine       = \"#\"\n"
      raw "  }"
      newlines 2
      raw "lang :: PT.GenTokenParser [Char] () ParseState\n"
@@ -253,7 +253,10 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      newlines 2
      raw "flag :: ParseFor String\n"
      raw "flag = do { cs <- many1 (oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\") ; return cs }\n"
-     raw "-- caps = do { cs <- many1 (oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\") ; return cs }\n\n"
+     raw "-- caps = do { cs <- many1 (oneOf \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\") ; return cs }"
+     newlines 2
+     raw "block0 p = PI.withPos $ do { r <- many (PI.checkIndent >> p); return r }\n"
+     raw "may p = option Nothing (do {x <- p; return $ Just x})\n"
      raw "(<?|>) p1 p2 = (try p1) <|> p2\n\n"
      raw "----------------------------------------------------------------\n-- Parser definition.\n\n"
      raw $ "root = do { whiteSpace ; r <- p" ++ eRoot ++ " ; eof ; return r }"
@@ -330,14 +333,17 @@ toParsecDefs (Parser _ _ ps) =
       element :: (String, Element S.Analysis) -> String
       element (v, e) = 
         let mkP e = case e of
-              NonTerminal _ nt                -> "p" ++ nt
-              Many e' Nothing                 -> "(many1 (" ++ mkP e' ++ "))"
-              Many e' (Just sep)              -> "(sepBy1 " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
-              May (Many e' Nothing)           -> "(many (" ++ mkP e' ++ "))"
-              May (Many e' (Just sep))        -> "(sepBy " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
-              May e'                          -> "(option (" ++ mkP e' ++ "))"
-              Indented False e'               -> mkP e'
-              Indented True (Many e' Nothing) -> "(PI.indented >> PI.block (" ++ mkP e' ++ "))"
+              NonTerminal _ nt         -> "p" ++ nt
+              Many e' Nothing          -> "(many1 (" ++ mkP e' ++ "))"
+              Many e' (Just sep)       -> "(sepBy1 " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              May (Many e' Nothing)    -> "(many (" ++ mkP e' ++ "))"
+              May (Many e' (Just sep)) -> "(sepBy " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              May e'                   -> "(may (" ++ mkP e' ++ "))"
+              Indented False e'        -> mkP e'
+              Indented True e' ->
+                case e' of
+                  Many e' Nothing       -> "(PI.indented >> PI.block (" ++ mkP e' ++ "))"
+                  May (Many e' Nothing) -> "(PI.indented >> block0 (" ++ mkP e' ++ "))"
               _                        -> ""
         in case e of
           Terminal t -> terminal v t

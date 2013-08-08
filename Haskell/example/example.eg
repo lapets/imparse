@@ -1,0 +1,12 @@
+
+
+host x : 
+  skip
+  skip
+  term x + y
+  
+host x chk :
+  decl 
+  skip
+  skip
+  skip

@@ -140,10 +140,11 @@ procWrite outs fname =
                   Nothing  -> do nothing
                   Just pre ->
                     do moduleName <- return $ (\(c:cs) -> toUpper c : cs) fname
+                       putStr $ "  Emitting Haskell implementation of \"" ++ moduleName ++ "\"...\n"
                        writeAndPutStr (fdir ++ "AbstractSyntax") "hs" (C.extract (toAbstractSyntax pre parser) "")
                        writeAndPutStr (fdir ++ "Report") "hs" (C.extract (toRichReport pre parser) "")
                        writeAndPutStr (fdir ++ "Parse") "hs" (C.extract (toParsec pre parser) "")
-
+                       putStr "\n"
               }
      }
 
@@ -152,7 +153,10 @@ usage = putStr $
      "\nUsage:\n\n"
   ++ "  imparse [optional flags] path/file.p\n\n"
   ++ "Flags:\n\n"
-  ++ ""
+  ++ "   -html\n"
+  ++ "   Emit HTML report containing parser static analysis results.\n\n"
+  ++ "   -hs \"Name.Prefix.For.Modules\"\n"
+  ++ "   Emit Haskell implementations of abstract syntax, parser, and\n   report generator with specified module name prefix.\n\n"
 
 cmd :: [OutputTarget] -> [String] -> IO ()
 cmd [] []            = usage

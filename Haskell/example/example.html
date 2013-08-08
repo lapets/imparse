@@ -1,0 +1,445 @@
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8"></meta>
+    <style>
+body {
+  font-family: Courier,Monospace;
+  font-size: 12px;
+}
+
+table {
+  font-family: Courier,Monospace;
+  font-size: 12px;
+}
+
+#RichReports_Message {
+  background-color: yellow;
+  padding: 3px;
+  border: 1px solid black;
+  font-family: Courier,Monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.RichReports_Clickable {
+  cursor: pointer;
+}
+
+.RichReports_Clickable_Exclamation {
+  background-color: yellow;
+  border: 1px solid black;
+  margin: 0px 5px 0px 5px;
+  padding: 0px 2px 0px 2px;
+  font-size: 9px;
+}
+
+.RichReports_Clickable:hover {
+  background-color: yellow;
+}
+
+.RichReports_Keyword {
+  font-weight: bold;
+  color: blue;
+}
+
+.RichReports_Variable {
+  font-style: italic;
+  color: green;
+}
+
+.RichReports_Literal {
+  font-weight: bold;
+  color: firebrick;
+}
+
+.RichReports_Error {
+  font-weight: bold;
+  color: red;
+  text-decoration: underline;
+}
+
+.RichReports_Highlight {
+  margin: 2px;
+}
+
+.RichReports_Highlight_Unbound {
+  background-color: orange;
+}
+
+.RichReports_Highlight_Unreachable {
+  background-color: orange;
+}
+
+.RichReports_Highlight_Duplicate {
+  background-color: yellow;
+}
+
+.RichReports_Highlight_Error {
+  background-color: lightpink;
+}
+
+.RichReports_BlockIndent {
+  margin-left: 10px;
+}
+</style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+    <script>function msg (obj, msgs) {var html = '';for (var i = 0; i < msgs.length; i++) html += '<div class="RichReports_MessagePortion">' + msgs[i] + '</div>';document.getElementById('RichReports_Message').innerHTML = html;document.getElementById('RichReports_Message').style.display = 'inline-block';var top = $(obj).offset().top;var left = $(obj).offset().left;$('#RichReports_Message').offset({top:top + 15, left:left + 15});}</script>
+  </head>
+  <body>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Host    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Host,Chk,Decl,Stmt,Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">Top</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Top</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Host    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Chk,Decl,Stmt,Term,Host    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="">
+                  <span class="RichReports_Keyword   ">`[</span>
+                  <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Chk,Decl,Stmt,Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">Host</span>
+                  <span class="RichReports_Keyword   ">]</span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Host    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Host,Chk,Decl,Stmt,Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Chk,Decl,Stmt,Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">Host</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Host</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term,Chk,Decl,Stmt    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">host</span>
+                <span class="RichReports_Keyword   ">`var</span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">`(</span>
+                  <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>chk</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">Chk</span>
+                  <span class="RichReports_Keyword   ">)</span>
+                </span>
+                <span class="RichReports_Literal   ">:</span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">`></span>
+                  <span class="">
+                    <span class="RichReports_Keyword   ">`(</span>
+                    <span class="">
+                      <span class="RichReports_Keyword   ">[</span>
+                      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>decl</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">Decl</span>
+                      <span class="RichReports_Keyword   ">]</span>
+                    </span>
+                    <span class="RichReports_Keyword   ">)</span>
+                  </span>
+                  <span class="RichReports_Keyword   "><</span>
+                </span>
+                <span class="">
+                  <span class="RichReports_Keyword   ">`></span>
+                  <span class="">
+                    <span class="RichReports_Keyword   ">`[</span>
+                    <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>skip</span>,      <span class=&quot;RichReports_Literal   &quot;>term</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">Stmt</span>
+                    <span class="RichReports_Keyword   ">]</span>
+                  </span>
+                  <span class="RichReports_Keyword   "><</span>
+                </span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>host</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Chk,Decl,Stmt,Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>chk</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">Chk</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Chk</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>chk</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">chk</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>chk</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>decl</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">Decl</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Decl</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>decl</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">decl</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>decl</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>skip</span>,      <span class=&quot;RichReports_Literal   &quot;>term</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">Stmt</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Skip</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>skip</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">skip</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>Term</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>term</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">term</span>
+                <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">`Term</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>skip</span>,      <span class=&quot;RichReports_Literal   &quot;>term</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Recursive,InfixPrefixThenDeterministic    </td>  </tr></table>']);">Term</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Plus</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Recursive,RecursiveInfix    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">`Term</span>
+                <span class="RichReports_Literal   ">+</span>
+                <span class="RichReports_Variable RichReports_Clickable  " onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>    </td>  </tr></table>']);">`Term</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>Term    </td>  </tr>  <tr>    <td>reach.:</td>    <td>Term    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Recursive,Deterministic,RecursivePrefixInfix    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+          <tr>
+            <td>V</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Keyword   ">`var</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Keyword   &quot;>`var</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div>&nbsp;</div>
+      <span class="RichReports_Variable RichReports_Clickable RichReports_Highlight RichReports_Highlight_Unreachable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>test</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Unreachable,Base,NonRecursive    </td>  </tr></table>']);">Test</span>
+::=
+      <div class="RichReports_BlockIndent">
+        <table>
+          <tr>
+            <td>Test</td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>test</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive    </td>  </tr></table>']);">
+                  <span class="">|</span>
+                </span>
+              </span>
+            </td>
+            <td>
+              <span class="">
+                <span class="RichReports_Literal   ">test</span>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+
+            </td>
+            <td>
+              <span>
+                <span class="RichReports_Clickable" onclick="msg(this, ['<table>  <tr>    <td>term.:</td>    <td>      <span class=&quot;RichReports_Literal   &quot;>test</span>    </td>  </tr>  <tr>    <td>non-term.:</td>    <td>    </td>  </tr>  <tr>    <td>reach.:</td>    <td>    </td>  </tr>  <tr>    <td>prop.:</td>    <td>Base,NonRecursive,Deterministic    </td>  </tr></table>']);">
+                  <span class="">^</span>
+                </span>
+              </span>
+            </td>
+            <td>
+
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div id="RichReports_Message" style="display:none;" onclick="this.style.display='none';"></div>
+  </body>
+</html>
