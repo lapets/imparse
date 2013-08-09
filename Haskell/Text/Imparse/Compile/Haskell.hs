@@ -18,7 +18,8 @@ import Data.Char (toLower)
 import Data.List (nub, (\\))
 import Data.String.Utils (join, replace)
 import Data.Maybe (catMaybes)
-import Control.Compilation.Compile
+import Control.Compilation
+import Control.Compilation.String
 
 import Text.Imparse.AbstractSyntax
 import qualified Text.Imparse.Analysis as S
@@ -36,7 +37,7 @@ toLowerFirst (c:cs) = toLower c : cs
 toAbstractSyntax :: String -> Parser a -> Compile String ()
 toAbstractSyntax prefix p =
   do prefix <- return $ if prefix == "" then "" else prefix ++ "."
-     raw $ "-- This module generated automatically by imparse.\n\n"
+     raw $ "-- This module was generated automatically by imparse.\n\n"
      raw $ "module " ++ prefix ++ "AbstractSyntax\n"
      raw "  where"
      newlines 2
@@ -118,7 +119,7 @@ toDatatype (Parser _ _ ps) =
 
 toRichReport :: String -> Parser a -> Compile String ()
 toRichReport prefix p =
-  do raw $ "-- This module generated automatically by imparse.\n\n"
+  do raw $ "-- This module was generated automatically by imparse.\n\n"
      prefix <- return $ if prefix == "" then "" else prefix ++ "."
      raw $ "module " ++ prefix ++ "Report"
      newline
@@ -197,7 +198,7 @@ toReportFuns (Parser _ _ ps) =
 
 toParsec :: String -> Parser S.Analysis -> Compile String ()
 toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
-  do raw $ "-- This module generated automatically by imparse.\n\n"
+  do raw $ "-- This module was generated automatically by imparse.\n\n"
      prefix <- return $ if prefix == "" then "" else prefix ++ "."
      raw $ "module " ++ prefix ++ "Parse\n  where\n"
      newline
@@ -296,7 +297,7 @@ toParsecDefs (Parser _ _ ps) =
              else
                do indent
                   ( if ((length css > 1) || (or [length cs > 1 | Choices _ cs <- css])) then
-                      do { newline ; raw "    " }
+                      do { newline ; raw "     " }
                     else
                       raw " "
                     )
@@ -314,7 +315,7 @@ toParsecDefs (Parser _ _ ps) =
         c:cs ->
           do choice c 
              newline
-             raw "<|> "
+             raw "<?|> "
              choices cs
 
       choice :: Choice S.Analysis -> Compile String ()

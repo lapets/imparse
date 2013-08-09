@@ -22,7 +22,7 @@ import Prelude hiding (catch)
 import System.IO.Error hiding (catch)
 import Control.Exception (throwIO, catch)
 
-import qualified Control.Compilation.Compile as C
+import qualified Control.Compilation as C
 import qualified Text.UxADT as U (uxadt, javaScriptModule)
 import Text.RichReports (report)
 import Text.Ascetic.HTML (html)
