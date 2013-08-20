@@ -1,28 +1,36 @@
 ----------------------------------------------------------------
 --
--- Imparse
--- Cross-platform/-language parser generator.
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse.hs
+-- @Text\/Imparse.hs@
+--
 --   Haskell implementation of the Imparse parser parser.
+--   Useful functions for the imparser parser generator.
 --
 
 ----------------------------------------------------------------
--- Useful functions for the imparser parser generator.
+--
 
 module Text.Imparse
   where
 
 import Data.Char (toUpper)
 import Data.List (splitAt, elemIndex)
-import System.Directory (createDirectory, removeDirectoryRecursive, doesDirectoryExist, doesFileExist, removeFile)
+import System.Directory (
+    createDirectory, 
+    removeDirectoryRecursive, 
+    doesDirectoryExist, 
+    doesFileExist, 
+    removeFile
+  )
 import System.Environment (getArgs)
 import System.IO ()
 import Prelude hiding (catch)
 import System.IO.Error hiding (catch)
 import Control.Exception (throwIO, catch)
 
-import qualified Control.Compilation as C
+import Control.Compilation.String (compiled)
 import qualified Text.UxADT as U (uxadt, javaScriptModule)
 import Text.RichReports (report)
 import Text.Ascetic.HTML (html)
@@ -34,8 +42,8 @@ import Text.Imparse.Analysis (Analysis, analyze)
 import Text.Imparse.Compile.Haskell
 
 ----------------------------------------------------------------
--- The target of the output, as specified by the command-line
--- arguments.
+-- | The target of the output, as specified by the command-line
+--   arguments.
 
 type HaskellModulePrefix = String
 
@@ -53,8 +61,8 @@ emitHaskell ots = case ots of
   ot:ots       -> emitHaskell ots
 
 ----------------------------------------------------------------
--- Take a file path in the form of a string, and try to parse
--- the contents of the file into abstract syntax.
+-- | Take a file path in the form of a string, and try to parse
+--   the contents of the file into abstract syntax.
 
 parseShow :: String -> IO ()
 parseShow fname =
@@ -76,8 +84,8 @@ parse str =
      }
 
 ----------------------------------------------------------------
--- Take a file path in the form of a string, read it, and
--- process it as specified by the command line.
+-- | Take a file path in the form of a string, read it, and
+--   process it as specified by the command line.
 
 nothing :: IO ()
 nothing = return ()
@@ -141,9 +149,9 @@ procWrite outs fname =
                   Just pre ->
                     do moduleName <- return $ (\(c:cs) -> toUpper c : cs) fname
                        putStr $ "  Emitting Haskell implementation of \"" ++ moduleName ++ "\"...\n"
-                       writeAndPutStr (fdir ++ "AbstractSyntax") "hs" (C.extract (toAbstractSyntax pre parser) "")
-                       writeAndPutStr (fdir ++ "Report") "hs" (C.extract (toRichReport pre parser) "")
-                       writeAndPutStr (fdir ++ "Parse") "hs" (C.extract (toParsec pre parser) "")
+                       writeAndPutStr (fdir ++ "AbstractSyntax") "hs" (compiled (toAbstractSyntax pre parser))
+                       writeAndPutStr (fdir ++ "Report") "hs" (compiled (toRichReport pre parser))
+                       writeAndPutStr (fdir ++ "Parse") "hs" (compiled (toParsec pre parser))
                        putStr "\n"
               }
      }

@@ -1,13 +1,15 @@
 ----------------------------------------------------------------
 --
--- Imparse
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse/Parse.hs
+-- @Text\/Imparse\/Parse.hs@
+--
 --   Parser for Imparse parser specification concrete syntax.
 --
 
 ----------------------------------------------------------------
--- 
+--
 
 module Text.Imparse.Parse (parseParser)
   where
@@ -23,7 +25,7 @@ import qualified StaticAnalysis.All as A
 import Text.Imparse.AbstractSyntax
 
 ----------------------------------------------------------------
--- Exported functions.
+-- | Exported functions.
 
 parseParser :: A.Analysis a => String -> Either String (Parser a)
 parseParser s = 
@@ -31,7 +33,7 @@ parseParser s =
   in Right $ Parser A.unanalyzed [] $ catMaybes [pProductionOrDelimiters (trim b) | b <- blocks]
 
 ----------------------------------------------------------------
--- Parsing functions.
+-- | Parsing functions.
 
 pProductionOrDelimiters :: A.Analysis a => String -> Maybe (Production a)
 pProductionOrDelimiters s = case splitOn "\n" (noEmptyLines s) of

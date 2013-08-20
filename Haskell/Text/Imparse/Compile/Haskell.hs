@@ -1,8 +1,10 @@
 ----------------------------------------------------------------
 --
--- Imparse
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse/Compile/Haskell.hs
+-- @Text\/Imparse\/Compile\/Haskell.hs@
+--
 --   Compilation from an Imparse parser definition to a Haskell
 --   implementation of a abstract syntax data type and Parsec
 --   parser.
@@ -14,27 +16,45 @@
 module Text.Imparse.Compile.Haskell
   where
 
-import Data.Char (toLower)
+import Data.Char (isAlphaNum, toLower)
 import Data.List (nub, (\\))
 import Data.String.Utils (join, replace)
 import Data.Maybe (catMaybes)
-import Control.Compilation
+import Control.Compilation (Compile, StateExtension(..), nothing)
 import Control.Compilation.String
+import Control.Compilation.Fresh
 
 import Text.Imparse.AbstractSyntax
 import qualified Text.Imparse.Analysis as S
 
 ----------------------------------------------------------------
--- Helper functions.
+-- | State data structure
+
+data State =
+  State StateExtensionFresh StateExtensionString
+
+instance StateExtension State where
+  initial = State initial initial
+
+instance HasFresh State where
+  project (State i s) = i
+  inject i (State _ s) = State i s
+
+instance HasString State where
+  project (State i s) = s
+  inject s (State i _) = State i s
+
+----------------------------------------------------------------
+-- | Helper functions.
 
 toLowerFirst :: String -> String
 toLowerFirst []     = []
 toLowerFirst (c:cs) = toLower c : cs
 
 ----------------------------------------------------------------
--- Compilation to abstract syntax data type definition.
+-- | Compilation to abstract syntax data type definition.
 
-toAbstractSyntax :: String -> Parser a -> Compile String ()
+toAbstractSyntax :: String -> Parser a -> Compile State ()
 toAbstractSyntax prefix p =
   do prefix <- return $ if prefix == "" then "" else prefix ++ "."
      raw $ "-- This module was generated automatically by imparse.\n\n"
@@ -45,9 +65,9 @@ toAbstractSyntax prefix p =
      newline
      raw "--eof"
 
-toDatatype :: Parser a -> Compile String ()
+toDatatype :: Parser a -> Compile State ()
 toDatatype (Parser _ _ ps) =
-  let production :: Production a -> Compile String ()
+  let production :: Production a -> Compile State ()
       production (Production _ e css) =
         do raw "data "
            raw e
@@ -60,7 +80,7 @@ toDatatype (Parser _ _ ps) =
            unindent
            newlines 2
 
-      choices :: [Choice a] -> Compile String ()
+      choices :: [Choice a] -> Compile State ()
       choices cs = case cs of
         [c]  -> 
           do choice c
@@ -71,7 +91,7 @@ toDatatype (Parser _ _ ps) =
              raw "| "
              choices cs
 
-      choice :: Choice a -> Compile String ()
+      choice :: Choice a -> Compile State ()
       choice c = case c of
         Choice _ con _ es -> 
           do con <-
@@ -82,7 +102,7 @@ toDatatype (Parser _ _ ps) =
              mapM element es
              nothing
 
-      element :: Element a -> Compile String ()
+      element :: Element a -> Compile State ()
       element e = case e of
         NonTerminal _ entity -> do { raw " "; raw entity }
         Many e _             -> do { raw " ["; elementNoSp e; raw "]" }
@@ -92,7 +112,7 @@ toDatatype (Parser _ _ ps) =
         Terminal t           -> do { raw " "; terminal t }
         _                    -> do nothing
 
-      elementNoSp :: Element a -> Compile String ()
+      elementNoSp :: Element a -> Compile State ()
       elementNoSp e = case e of
         NonTerminal _ entity -> do { raw entity }
         Many e  _            -> do { raw "["; element e; raw "]" }
@@ -100,7 +120,7 @@ toDatatype (Parser _ _ ps) =
         May e                -> do { raw "(Maybe "; elementNoSp e; raw ")" }
         _                    -> element e
 
-      terminal :: Terminal -> Compile String ()
+      terminal :: Terminal -> Compile State ()
       terminal t = case t of
         StringLiteral  -> raw "String"
         NaturalLiteral -> raw "Integer"
@@ -115,9 +135,9 @@ toDatatype (Parser _ _ ps) =
         nothing
 
 ----------------------------------------------------------------
--- Compilation to rich reporting instance declarations.
+-- | Compilation to rich reporting instance declarations.
 
-toRichReport :: String -> Parser a -> Compile String ()
+toRichReport :: String -> Parser a -> Compile State ()
 toRichReport prefix p =
   do raw $ "-- This module was generated automatically by imparse.\n\n"
      prefix <- return $ if prefix == "" then "" else prefix ++ "."
@@ -133,9 +153,9 @@ toRichReport prefix p =
      newline
      raw "--eof"
 
-toReportFuns :: Parser a -> Compile String ()
+toReportFuns :: Parser a -> Compile State ()
 toReportFuns (Parser _ _ ps) =
-  let production :: Production a -> Compile String ()
+  let production :: Production a -> Compile State ()
       production (Production _ e css) =
         do raw $ "instance R.ToReport " ++ e ++ " where"
            indent
@@ -148,12 +168,12 @@ toReportFuns (Parser _ _ ps) =
            unindent
            newline
 
-      choices :: Choices a -> Compile String ()
+      choices :: Choices a -> Compile State ()
       choices (Choices a cs) = case cs of
         []   -> do nothing
         c:cs -> do { choice c; newline; choices (Choices a cs) }
 
-      choice :: Choice a -> Compile String ()
+      choice :: Choice a -> Compile State ()
       choice c = case c of
         Choice _ con _ es -> 
           do con <-
@@ -194,9 +214,9 @@ toReportFuns (Parser _ _ ps) =
         nothing
 
 ----------------------------------------------------------------
--- Compilation to Parsec parser.
+-- | Compilation to Parsec parser.
 
-toParsec :: String -> Parser S.Analysis -> Compile String ()
+toParsec :: String -> Parser S.Analysis -> Compile State ()
 toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
   do raw $ "-- This module was generated automatically by imparse.\n\n"
      prefix <- return $ if prefix == "" then "" else prefix ++ "."
@@ -205,8 +225,8 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      raw $ "import " ++ prefix ++ "AbstractSyntax"
      newlines 2
 
-     reservedOpNames <- return $ nub $ S.infixPrefixOps p
-     opLetters <- return $ nub $ concat reservedOpNames
+     reservedOpNames <- return $ nub $ S.allOps p
+     opLetters <- return $ nub $ [c | c <- concat reservedOpNames, not $ isAlphaNum c]
      reservedNames <- return $ (nub [r | Explicit r <- terminals p]) \\ reservedOpNames
 
      raw "----------------------------------------------------------------\n-- Parser to convert concrete syntax to abstract syntax.\n\n"
@@ -265,9 +285,12 @@ toParsec prefix (p@(Parser _ _ ((Production _ eRoot _):_))) =
      toParsecDefs p
      raw "--eof"
 
-toParsecDefs :: Parser S.Analysis -> Compile String ()
+toParsecDefs :: Parser S.Analysis -> Compile State ()
 toParsecDefs (Parser _ _ ps) =
-  let production :: Production S.Analysis -> Compile String ()
+  let explicitCmb :: String -> String
+      explicitCmb s = if isOp s then "rO" else "res" 
+
+      production :: Production S.Analysis -> Compile State ()
       production (p@(Production _ e css)) =
         do raw $ "p" ++ e ++ " ="
            ( if S.ProductionInfixPrefixThenDeterministic `elem` S.tags p then
@@ -306,7 +329,7 @@ toParsecDefs (Parser _ _ ps) =
                   newline
              )
 
-      choices :: [Choice S.Analysis] -> Compile String ()
+      choices :: [Choice S.Analysis] -> Compile State ()
       choices cs = case cs of
         [c]  -> 
           do choice c
@@ -318,7 +341,7 @@ toParsecDefs (Parser _ _ ps) =
              raw "<?|> "
              choices cs
 
-      choice :: Choice S.Analysis -> Compile String ()
+      choice :: Choice S.Analysis -> Compile State ()
       choice (c@(Choice _ con _ es)) =
           do ves <- return $ [("v" ++ show k, es!!k) | k <- [0..length es-1]]
              con <-
@@ -336,9 +359,9 @@ toParsecDefs (Parser _ _ ps) =
         let mkP e = case e of
               NonTerminal _ nt         -> "p" ++ nt
               Many e' Nothing          -> "(many1 (" ++ mkP e' ++ "))"
-              Many e' (Just sep)       -> "(sepBy1 " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              Many e' (Just sep)       -> "(sepBy1 " ++ mkP e' ++ " (" ++ explicitCmb sep ++ " \"" ++ sep ++ "\"))"
               May (Many e' Nothing)    -> "(many (" ++ mkP e' ++ "))"
-              May (Many e' (Just sep)) -> "(sepBy " ++ mkP e' ++ " (res \"" ++ sep ++ "\"))"
+              May (Many e' (Just sep)) -> "(sepBy " ++ mkP e' ++ " (" ++ explicitCmb sep ++ " \"" ++ sep ++ "\"))"
               May e'                   -> "(may (" ++ mkP e' ++ "))"
               Indented False e'        -> mkP e'
               Indented True e' ->
@@ -372,7 +395,6 @@ toParsecDefs (Parser _ _ ps) =
 
       terminal :: String -> Terminal -> String
       terminal v t = case t of
-        Explicit s     -> "res \"" ++ s ++ "\""
         StringLiteral  -> v ++ " <- literal"
         NaturalLiteral -> v ++ " <- natural"
         DecimalLiteral -> v ++ " <- decimal"
@@ -380,6 +402,7 @@ toParsecDefs (Parser _ _ ps) =
         Constructor    -> v ++ " <- con"
         Flag           -> v ++ " <- flag"
         RegExp r       -> "regexp"
+        Explicit s     -> explicitCmb s ++ " \"" ++ s ++ "\""
 
   in do mapM production ps
         nothing

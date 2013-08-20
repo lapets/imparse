@@ -1,13 +1,15 @@
 ----------------------------------------------------------------
 --
--- Imparse
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse/Analysis.hs
+-- @Text\/Imparse\/Analysis.hs@
+--
 --   Analyzer/validator for Imparse parsers.
 --
 
 ----------------------------------------------------------------
--- 
+--
 
 module Text.Imparse.Analysis
   where
@@ -23,8 +25,8 @@ import qualified Text.Imparse.AbstractSyntax as A
 import Text.Imparse.Report
 
 ----------------------------------------------------------------
--- Analysis data structure, instance declarations, accessors,
--- and mutators.
+-- | Analysis data structure, instance declarations, accessors,
+--   and mutators.
 
 type InitialNonTerminals = [A.NonTerminal]
 type InitialTerminals = [A.Terminal]
@@ -70,19 +72,19 @@ tag :: Analysis -> [Tag] -> Analysis
 tag a ts' = case a of 
   Analyzed ts c -> Analyzed (nub $ ts' ++ ts) c
 
-tags :: S.Annotated a => a Analysis -> [Tag]
+tags :: S.Annotate a => a Analysis -> [Tag]
 tags d = let Analyzed ts _ = S.annotation d in ts
 
-initialTerminals :: S.Annotated a => a Analysis -> InitialTerminals
+initialTerminals :: S.Annotate a => a Analysis -> InitialTerminals
 initialTerminals d = let Analyzed _ (ts, _, _) = S.annotation d in ts
 
-initialNonTerminals :: S.Annotated a => a Analysis -> InitialNonTerminals
+initialNonTerminals :: S.Annotate a => a Analysis -> InitialNonTerminals
 initialNonTerminals d = let Analyzed _ (_, ns, _) = S.annotation d in ns
 
-reachable :: S.Annotated a => a Analysis -> ReachableNonTerminals
+reachable :: S.Annotate a => a Analysis -> ReachableNonTerminals
 reachable d = let Analyzed _ (_, _, rns) = S.annotation d in rns
 
-characterization :: S.Annotated a => a Analysis -> Characterization
+characterization :: S.Annotate a => a Analysis -> Characterization
 characterization d = let Analyzed _ c = S.annotation d in c
 
 combine :: [Characterization] -> Characterization
@@ -92,7 +94,7 @@ mapCmb :: (a -> (a, Characterization)) -> [a] -> ([a], Characterization)
 mapCmb f xs = let (xs', cs) = unzip $ map f xs in (xs', combine cs)
 
 ----------------------------------------------------------------
--- Reporting of analysis results.
+-- | Reporting of analysis results.
 
 instance R.ToMessages Analysis where
   messages a = case a of
@@ -143,9 +145,9 @@ instance R.ToHighlights Tag where
     _ -> []
 
 ----------------------------------------------------------------
--- Baseline analysis (initial non-/terminals and reachable
--- non-terminals) and its closure (fully recursive
--- characterization of initial and reachable non-/terminals).
+-- | Baseline analysis (initial non-/terminals and reachable
+--   non-terminals) and its closure (fully recursive
+--   characterization of initial and reachable non-/terminals).
 
 baseline :: A.Parser Analysis -> A.Parser Analysis
 baseline (A.Parser a ims ps) = A.Parser (Analyzed [] r) ims ps' where
@@ -219,7 +221,7 @@ closure (A.Parser a ims ps) = A.Parser a ims ps'' where
   lookP e' (A.Production (Analyzed _ c) e _) = if e == e' then [c] else []
 
 ----------------------------------------------------------------
--- Property derivation and tagging algorithms.
+-- | Property derivation and tagging algorithms.
 
 tagging :: A.Parser Analysis -> A.Parser Analysis
 tagging (A.Parser a ims ps) = A.Parser a ims (map production ps) where
@@ -314,7 +316,7 @@ analyze parser =
     in A.Parser a ims ps'''
 
 ----------------------------------------------------------------
--- Other useful functions.
+-- | Other useful functions.
 
 infixPrefixOps :: A.Parser Analysis -> [String]
 infixPrefixOps (A.Parser _ _ ps) = 
@@ -331,5 +333,16 @@ infixPrefixOps (A.Parser _ _ ps) =
          c@(A.Choice _ _ _ [A.NonTerminal _ nt1, A.Terminal (A.Explicit op), A.NonTerminal _ nt2]) <- cs,
          ChoiceRecursiveInfix `elem` tags c
        ]
+
+allOps :: A.Parser Analysis -> [String]
+allOps (p@(A.Parser _ _ ps)) = 
+  nub $ infixPrefixOps p
+    ++  [s | 
+          A.Production _ _ css <- ps, 
+          A.Choices _ cs <- css, 
+          A.Choice _ _ _ es <- cs,
+          A.Terminal (A.Explicit s) <- es,
+          A.isOp s
+        ]
 
 --eof

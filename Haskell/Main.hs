@@ -1,20 +1,17 @@
 ----------------------------------------------------------------
 --
--- Imparse
--- Cross-platform/-language parser generator.
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Main.hs
---   Haskell executable wrapper for the Imparse parser parser.
+-- @Main.hs@
 --
---
--- * Usage:
---
---   imparse "path/file.p"
+--   Main module for the Haskell implementation of the Imparse
+--   parser. Compiled into a Haskell executable wrapper for the
+--   Imparse parser definition parser.
 --
 
 ----------------------------------------------------------------
--- Main module for the Haskell implementation of the
--- Imparse parser.
+--
 
 module Main
   where
@@ -25,7 +22,7 @@ import System.IO
 import Text.Imparse (cmd)
 
 ----------------------------------------------------------------
--- The main function.
+-- | The main function.
 
 main :: IO ()
 main =

@@ -1,8 +1,10 @@
 ----------------------------------------------------------------
 --
--- Imparse
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse/AbstractSyntax.hs
+-- @Text\/Imparse\/AbstractSyntax.hs@
+--
 --   Data structure for Imparse parser definitions.
 --
 
@@ -12,15 +14,18 @@
 module Text.Imparse.AbstractSyntax
   where
 
-import Data.String.Utils (join)
+import Data.Char (isAlpha)
 import Data.List (nub)
+import Data.String.Utils (join)
 
 import qualified Text.RichReports as R
 import qualified Text.UxADT as U
-import qualified StaticAnalysis.All as A
+import qualified StaticAnalysis.Annotate as A
+import qualified StaticAnalysis.Analyze as A
+import qualified StaticAnalysis.Analysis as A
 
 ----------------------------------------------------------------
--- Parser data structure.
+-- | Parser data structure.
 
 type Import = String
 type NonTerminal = String
@@ -76,30 +81,30 @@ data Terminal =
   deriving Eq
 
 ----------------------------------------------------------------
--- Static analysis annotation setting and retrieval.
+-- | Static analysis annotation setting and retrieval.
 
-instance A.Annotated Parser where
-  annotate (Parser _ ms ps) a = Parser a ms ps
+instance A.Annotate Parser where
+  annotate a (Parser _ ms ps) = Parser a ms ps
   annotation (Parser a ms ps) = a
 
-instance A.Annotated Production where
-  annotate (Production _ e css) a = Production a e css
+instance A.Annotate Production where
+  annotate a (Production _ e css) = Production a e css
   annotation (Production a _ _) = a
 
-instance A.Annotated Choices where
-  annotate (Choices _ cs) a = Choices a cs
+instance A.Annotate Choices where
+  annotate a (Choices _ cs) = Choices a cs
   annotation (Choices a _) = a
 
-instance A.Annotated Choice where
-  annotate (Choice _ mc asc es) a = Choice a mc asc es
+instance A.Annotate Choice where
+  annotate a (Choice _ mc asc es) = Choice a mc asc es
   annotation (Choice a _ _ _) = a
 
-instance A.Annotated Element where
-  annotate e a = case e of
+instance A.Annotate Element where
+  annotate a e = case e of
     NonTerminal _ e -> NonTerminal a e
-    Many e ms       -> Many (A.annotate e a) ms
-    May e           -> May (A.annotate e a)
-    Indented w e    -> Indented w $ A.annotate e a
+    Many e ms       -> Many (A.annotate a e) ms
+    May e           -> May (A.annotate a e)
+    Indented w e    -> Indented w $ A.annotate a e
     _ -> e
   annotation e = case e of
     NonTerminal a _ -> a
@@ -109,7 +114,10 @@ instance A.Annotated Element where
     _               -> A.unanalyzed
 
 ----------------------------------------------------------------
--- Functions for inspecting parser instances.
+-- | Functions for inspecting parser instances.
+
+isOp :: String -> Bool
+isOp s = not (s `elem` ["(",")","[","]","{","}"]) && not (and (map isAlpha s))
 
 isData :: Element a -> Bool
 isData e = case e of
@@ -135,7 +143,7 @@ productionNonTerminal :: Production a -> NonTerminal
 productionNonTerminal (Production _ nt _) = nt
 
 ----------------------------------------------------------------
--- Functions for converting a parser into a UXADT instance string.
+-- | Functions for converting a parser into a UXADT instance string.
 
 instance U.ToUxADT (Parser a) where
   uxadt (p@(Parser _ _ ps)) = 
@@ -174,7 +182,7 @@ instance U.ToUxADT Terminal where
     RegExp r        -> U.C "RegExp" [U.S r]
 
 ----------------------------------------------------------------
--- Functions for converting a parser into an ASCII string.
+-- | Functions for converting a parser into an ASCII string.
 
 instance Show (Parser a) where
   show (Parser _ _ ps) = join "\n\n" (map show ps) ++ "\n"

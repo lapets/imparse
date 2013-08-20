@@ -1,13 +1,15 @@
 ----------------------------------------------------------------
 --
--- Imparse
+-- | Imparse
+--   Cross-platform and -language parser generator.
 --
--- Text/Imparse/Report.hs
+-- @Text\/Imparse\/Report.hs@
+--
 --   Generation of rich reports from parser definitions.
 --
 
 ----------------------------------------------------------------
--- 
+--
 
 module Text.Imparse.Report
   where
@@ -20,8 +22,8 @@ import qualified Text.RichReports as R
 import Text.Imparse.AbstractSyntax
 
 ----------------------------------------------------------------
--- Functions for converting a parser abstract syntax instance
--- into a rich report.
+-- | Functions for converting a parser abstract syntax instance
+--   into a rich report.
 
 instance (R.ToHighlights a, R.ToMessages a) => R.ToReport (Parser a) where
   report (Parser _ _ ps) = R.Finalize $ R.Conc [R.report p | p <- ps]
