@@ -27,7 +27,9 @@ Library
                    compilation,
                    ascetic,
                    uxadt,
-                   richreports
+                   richreports,
+                   parsec,
+                   indents
 
 Executable imparse
   Main-Is:         Main.hs
@@ -41,7 +43,9 @@ Executable imparse
                    compilation,
                    ascetic,
                    uxadt,
-                   richreports
+                   richreports,
+                   parsec,
+                   indents
 
 Source-Repository head
   Type:            git
