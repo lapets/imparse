@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <style type="text/css">
+      #output { font-family:Courier,Monospace; }
+    </style>
+    <script src="underscore.js"></script>
+    <script src="uxadt.js"></script>
+    <script src="richreports.js"></script>
+    <script src="imparse.js"></script>
+    <script>
+(function (uxadt, imparse) {
+
+  var I = imparse;
+  var grammar =
+    I.Grammar([
+      I.Production('formula', [
+        I.Choices([
+          I.Choice('And', I.AssocNone(), [I.Nonterminal('formula'), I.Terminal('and'), I.Nonterminal('formula')]),
+          I.Choice('Or', I.AssocNone(), [I.Nonterminal('formula'), I.Terminal('or'), I.Nonterminal('formula')])
+        ]),
+        I.Choices([
+          I.Choice('Equal', I.AssocNone(), [I.Nonterminal('number'), I.Terminal('=='), I.Nonterminal('number')]),
+          I.Choice('True', I.AssocNone(), [I.Terminal('true')]),
+          I.Choice('False', I.AssocNone(), [I.Terminal('false')]),
+          I.Choice('Not', I.AssocNone(), [I.Terminal('not'), I.Nonterminal('formula')])
+        ])
+      ]),
+      I.Production('number', [
+        I.Choices([
+          I.Choice('Plus', I.AssocNone(), [I.Nonterminal('numberLeft'), I.Terminal('+'), I.Nonterminal('number')]),
+          I.Choice('Minus', I.AssocNone(), [I.Nonterminal('numberLeft'), I.Terminal('-'), I.Nonterminal('number')]),
+          I.Choice('Number', I.AssocNone(), [I.RegExpr('(0|([1-9][0-9]*))')])
+        ])
+      ]),
+      I.Production('numberLeft', [
+        I.Choices([
+          I.Choice('Number', I.AssocNone(), [I.RegExpr('(0|([1-9][0-9]*))')])
+        ])
+      ])
+    ]);
+
+  this.proc = function() {
+    var s = document.getElementById('input').value;
+    var tree_tokens = imparse(grammar)(s);
+    var tree = tree_tokens[0];
+    document.getElementById('output').innerHTML = JSON.stringify(tree);
+  }
+
+})(uxadt, imparse, this);
+    </script>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td>
+          <textarea rows="20" cols="40" id="input">not not 4 == 5 + 2</textarea>
+        </td>
+        <td>
+          <div id="output" onclick="proc();" style="height:100%; width:100%;">click here to parse</div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
