@@ -13,10 +13,10 @@ exec(open("imparse.py").read())
 
 grammar = Grammar([\
    Production('formula', [\
- #    Choices([\
- #      Choice('And', AssocNone(), [Nonterminal('formula'), Terminal('and'), Nonterminal('formula')]),\
- #      Choice('Or', AssocNone(), [Nonterminal('formula'), Terminal('or'), Nonterminal('formula')])\
- #    ]),\
+     Choices([\
+       Choice('And', AssocNone(), [Nonterminal('formula'), Terminal('and'), Nonterminal('formula')]),\
+       Choice('Or', AssocNone(), [Nonterminal('formula'), Terminal('or'), Nonterminal('formula')])\
+     ]),\
      Choices([\
        Choice('Equal', AssocNone(), [Nonterminal('number'), Terminal('=='), Nonterminal('number')]),\
        Choice('True', AssocNone(), [Terminal('true')]),\
@@ -38,5 +38,5 @@ grammar = Grammar([\
    ])\
  ])
 
-# Automatically runs interactive parser.
+# Launch interactive parser.
 interact()

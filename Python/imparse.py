@@ -1,3 +1,4 @@
+
 #######################################################
 ##
 ## Imparse.py
@@ -6,6 +7,7 @@
 ##
 ##    Web:     imparse.org
 ##    Version: 0.0.0.4
+##
 ##
 #######################################################
 
@@ -74,8 +76,7 @@ def parser(grammar, s):
         if t in "()+*": t = "\\" + t
         terminals = terminals + [t]
 
-  #def parse(tmp, nt = topNonterminal):
-  def parse(tmp, nt = None):
+  def parse(tmp, nt = None, leftFactor = False):
     # Tokenize tmp if it is a string
     if type(tmp) == str:
       tmp = [t for t in re.split("(\s+|"+"|".join(terminals)+")", tmp)]
@@ -102,6 +103,7 @@ def parser(grammar, s):
               if len(seq) == 0:
                 return (label, [])
 
+            count = 0
             for x in seq:
               # Regular expression
               if etype(x) == "r":
@@ -110,6 +112,7 @@ def parser(grammar, s):
                   if len(tokens) > 0 and re.compile(r[1:-1]).match(tokens[0]):
                     es = es + [tokens[0]]
                     tokens = tokens[1:]
+                    count = count + 1
                   else: break
 
               # Terminal
@@ -118,15 +121,25 @@ def parser(grammar, s):
                 if len(tokens) > 0 and tokens[0] == t:
                   tokens = tokens[1:]
                   ts = ts + 1
+                  count = count + 1
                 else: break
 
               # Nonterminal
               else:
-                nt2 = x.match(Nonterminal(_), lambda nt: nt).end
-                r = parse(tokens, nt2)
-                if not r is None:
-                  (e, tokens) = r
-                  es = es + [e]
+                if leftFactor == True:
+                  pass
+                else:
+                  nt2 = x.match(Nonterminal(_), lambda nt: nt).end
+                  if count == 0: # Checks if x is the first element in the choice
+                    r = parse(tokens, nt2, True)
+                  else:
+                    r = parse(tokens, nt2)
+                  if not r is None:
+                    (e, tokens) = r
+                    es = es + [e]
+                    count = count + 1
+                  else: break
+
             if ts + len(es) == len(seq):
               return ({label:es} if len(es) > 0 else label, tokens)
 
