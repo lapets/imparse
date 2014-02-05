@@ -40,3 +40,5 @@ grammar = Grammar([\
 
 # Launch interactive parser.
 interact()
+
+#eof

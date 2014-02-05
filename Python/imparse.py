@@ -1,4 +1,3 @@
-
 #######################################################
 ##
 ## Imparse.py
@@ -73,13 +72,21 @@ def parser(grammar, s):
     for x in seq:
       if etype(x) == "t":
         t = x.match(Terminal(_), lambda t: t).end
-        if t in "()+*": t = "\\" + t
-        terminals = terminals + [t]
+        if t in "[]()+*|.":
+          tmpt = "\\" + t
+          if tmpt not in terminals:
+            terminals = terminals + [tmpt]
+        elif t == "||":
+          tmpt = "[\|]*"
+          if tmpt not in terminals:
+            terminals = terminals + [tmpt]
+        elif t not in terminals:
+          terminals = terminals + [t]
 
   def parse(tmp, nt = None, leftFactor = False):
     # Tokenize tmp if it is a string
     if type(tmp) == str:
-      tmp = [t for t in re.split("(\s+|"+"|".join(terminals)+")", tmp)]
+      tmp = [t for t in re.split(r"(\s+|"+"|".join(terminals)+")", tmp)]
       tmp = [t for t in tmp if not (t == None or t.isspace() or t == "")]
 
     for p in ps:
@@ -126,14 +133,16 @@ def parser(grammar, s):
 
               # Nonterminal
               else:
+                #print(label)
                 if leftFactor == True:
-                  pass
+                  print('Left factoring skipping', label)
                 else:
+                  print('Label:', label, '\t\tTokens:', tokens)
                   nt2 = x.match(Nonterminal(_), lambda nt: nt).end
                   if count == 0: # Checks if x is the first element in the choice
                     r = parse(tokens, nt2, True)
                   else:
-                    r = parse(tokens, nt2)
+                    r = parse(tokens, nt2, False)
                   if not r is None:
                     (e, tokens) = r
                     es = es + [e]
@@ -141,13 +150,17 @@ def parser(grammar, s):
                   else: break
 
             if ts + len(es) == len(seq):
-              return ({label:es} if len(es) > 0 else label, tokens)
+              if label is None and len(es) == 1:
+                return (e, tokens)
+              else:
+                return ({label:es} if len(es) > 0 else label, tokens)
 
   r = parse(s)
   if not r is None:
     (p, t) = r
     if len(t) == 0:
       return p
+  print(r)
   print("Syntax error occurred, input could not be parsed.")
   return None
 
@@ -181,3 +194,5 @@ def etype(e):
     .match(RegExpr(_), lambda r: "r")\
     .match(Nonterminal(_), lambda nt: "nt")\
     .end
+
+#eof
