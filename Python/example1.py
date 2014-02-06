@@ -26,16 +26,11 @@ grammar = Grammar([\
    ]),\
    Production('number', [\
      Choices([\
-       Choice('Plus', AssocNone(), [Nonterminal('numberLeft'), Terminal('+'), Nonterminal('number')]),\
-       Choice('Minus', AssocNone(), [Nonterminal('numberLeft'), Terminal('-'), Nonterminal('number')]),\
+       Choice('Plus', AssocNone(), [Nonterminal('number'), Terminal('+'), Nonterminal('number')]),\
+       Choice('Minus', AssocNone(), [Nonterminal('number'), Terminal('-'), Nonterminal('number')]),\
        Choice('Number', AssocNone(), [RegExpr('/(0|[1-9][0-9]*)/')])\
      ])\
    ]),\
-   Production('numberLeft', [\
-     Choices([\
-       Choice('Number', AssocNone(), [RegExpr('/(0|[1-9][0-9]*)/')])\
-     ])\
-   ])\
  ])
 
 # Launch interactive parser.

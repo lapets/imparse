@@ -112,6 +112,7 @@ def parser(grammar, s):
 
             count = 0
             for x in seq:
+
               # Regular expression
               if etype(x) == "r":
                 r = x.match(RegExpr(_), lambda r: r).end
@@ -133,11 +134,9 @@ def parser(grammar, s):
 
               # Nonterminal
               else:
-                #print(label)
-                if leftFactor == True:
-                  print('Left factoring skipping', label)
+                if leftFactor == True and ts + len(es) == 0:
+                  break
                 else:
-                  print('Label:', label, '\t\tTokens:', tokens)
                   nt2 = x.match(Nonterminal(_), lambda nt: nt).end
                   if count == 0: # Checks if x is the first element in the choice
                     r = parse(tokens, nt2, True)
