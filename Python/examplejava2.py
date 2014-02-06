@@ -1,9 +1,10 @@
-
 #######################################################
 ##
 ## Examplejava.py
 ##
 ## Example Java of a grammar implementation.
+##
+## Note: Support for May, Many, and MayMany coming soon.
 ##
 #######################################################
 
