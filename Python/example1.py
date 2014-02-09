@@ -3,7 +3,7 @@
 ##
 ## Example1.py
 ##
-## Example 1 of a grammar implementation.
+## Example of a grammar implementation.
 ##
 #######################################################
 
@@ -33,7 +33,7 @@ grammar = Grammar([\
    ]),\
  ])
 
-# Launch interactive parser.
-interact()
+## Launch interactive parser.
+#interact()
 
 #eof
