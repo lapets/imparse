@@ -36,15 +36,6 @@ def tokenize(ps, s):
   tokens = [t for t in tmp if not (t == None or t.isspace() or t == "")]
   return tokens
 
-## Regular Expression Handler
-def regExpr(tokens, regex, es):
-  if regex[0] == '/' and regex[-1] == '/':
-    if len(tokens) > 0 and re.compile(regex[1:-1]).match(tokens[0]):
-      es = es + [tokens[0]]
-      tokens = tokens[1:]
-      return (tokens, es)
-    else:
-      return None
 
 def parse(ps, tmp, nt = None, leftFactor = False):
   for p in ps:
