@@ -35,8 +35,8 @@ eval(U.uxadt.definition({\
   }))
 
 eval(U.uxadt.definition({\
-  'One': [],\
-  'May': [],\
+  'One': [_],\
+  'May': [_],\
   'Many': [_],\
   'MayMany': [_]\
   }))

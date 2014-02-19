@@ -59,40 +59,61 @@ def parse(ps, tmp, nt = None, leftFactor = False):
           if len(seq) == 0:
             return (label, [])
 
+        incseq = 0
         for x in seq:
-          # May/Many/MayMany
-          if etype(x) == 'm':
-            pass
+          et = etype(x)
+          if et is not None:
+            (ty, expr) = et
+
+          if et is None:
+            (ty, seq2) = ptype(x)
+            r = parExpr(ps, tokens, (ty, seq2))
+            if r is not None:
+              if r == True:
+                ts = ts + 1
+              else:
+                (e, tokens) = r
+                es = es + [e]
+
+              if ty == 'Many' or ty == 'MayMany':
+                while r is not None and r != True:
+                  r = parExpr(ps, tokens, (ty, seq2))
+                  if r is not None:
+                    if r is True:
+                      ts = ts + 1
+                      incseq = incseq + 1
+                    else:
+                      (e, tokens) = r
+                      es = es + [e]
+                      incseq = incseq + 1
+            else: break
 
           # Terminal
-          elif etype(x) == 't':
-            t = x.match(Terminal(_), lambda t: t).end
-            if len(tokens) > 0 and tokens[0] == t:
+          elif ty == 't':
+            if len(tokens) > 0 and tokens[0] == expr:
               tokens = tokens[1:]
               ts = ts + 1
             else: break
 
           # Regular expression
-          elif etype(x) == 'r':
-            regex = x.match(RegExpr(_), lambda r: r).end
-            if regex[0] == '/' and regex[-1] == '/':
-              if len(tokens) > 0 and re.compile(regex[1:-1]).match(tokens[0]):
+          elif ty == 'r':
+            if expr[0] == '/' and expr[-1] == '/':
+              if len(tokens) > 0 and re.compile(expr[1:-1]).match(tokens[0]):
                 es = es + [tokens[0]]
                 tokens = tokens[1:]
               else: break
           
           # Nonterminal
-          elif etype(x) == 'nt':
-            nt2 = x.match(Nonterminal(_), lambda nt: nt).end
+          elif ty == 'nt':
             if ts + len(es) == 0:
-              if nt2 == nt and leftFactor == True: # Top nonterminal
+              if expr == nt and leftFactor == True: # Top nonterminal
                 break
-              elif nt2 == pnt:
-                r = parse(ps, tokens, nt2, True)
+              elif expr == pnt:
+                r = parse(ps, tokens, expr, True)
               else:
-                r = parse(ps, tokens, nt2, False)
+                r = parse(ps, tokens, expr, False)
             else: # Nonterminal is not the first element of the choice
-              r = parse(ps, tokens, nt2, False)
+              r = parse(ps, tokens, expr, False)
 
             if r is not None:
               (e, tokens) = r
@@ -100,19 +121,70 @@ def parse(ps, tmp, nt = None, leftFactor = False):
               leftFactor = False
             else: break
 
-        if ts + len(es) == len(seq):
+        if ts + len(es) == len(seq) + incseq:
           if label is None and len(es) == 1:
             return (e, tokens)
           else:
             return ({label:es} if len(es) > 0 else label, tokens)
   
 
+
+def parExpr(ps, tokens, e):
+  (ty, seq) = e
+  if ty == 'May' or ty == 'MayMany':
+    may = True
+  else:
+    may = False
+  ts = 0
+  es = []
+
+  for x in seq:
+    (ety, expr) = etype(x)
+
+    # Terminal
+    if ety == 't':
+      t = x.match(Terminal(_), lambda t: t).end
+      if len(tokens) > 0 and tokens[0] == t:
+        tokens = tokens[1:]
+        ts = ts + 1
+      else: break
+
+    # Regular expression
+    elif ety == 'r':
+      regex = x.match(RegExpr(_), lambda r: r).end
+      if regex[0] == '/' and regex[-1] == '/':
+        if len(tokens) > 0 and re.compile(regex[1:-1]).match(tokens[0]):
+          es = es + [tokens[0]]
+          tokens = tokens[1:]
+        else: break
+
+    # Nonterminal
+    elif ety == 'nt':
+      nt = x.match(Nonterminal(_), lambda nt: nt).end
+      r = parse(ps, tokens, nt2, False)
+      if r is not None:
+        (e, tokens) = r
+        es = es + [e]
+      else: break
+
+  if ts + len(es) == len(seq):
+    if len(es) == 1:
+      return (es[0], tokens)
+    else:
+      return (es, tokens)
+  else:
+    if may:
+      return True
+    else:
+      return None
+
+
 def parser(grammar, s):
   ps = grammar.match(Grammar(_), lambda ps: ps).end
   tokens = tokenize(ps, s)
 
   r = parse(ps, tokens)
-  print(r)
+#  print('R:', r)
   if not r is None:
     (p, t) = r
     if len(t) == 0:
@@ -130,7 +202,7 @@ def interact():
   while True:
     # Prompt the user for a query.
     s = input('> ')
-    if s == ':quit' or s == ':q':
+    if s == 'q' or s == ':q':
       break
   
     # Parse the query.
@@ -147,9 +219,18 @@ def interact():
 
 def etype(e):
   return e\
-    .match(Terminal(_), lambda t: "t")\
-    .match(RegExpr(_), lambda r: "r")\
-    .match(Nonterminal(_), lambda nt: "nt")\
+    .match(Terminal(_), lambda t: ("t", t))\
+    .match(RegExpr(_), lambda r: ("r", r))\
+    .match(Nonterminal(_), lambda nt: ("nt", nt))\
     .end
+
+def ptype(e):
+  return e\
+    .match(One(_), lambda seq: ("One", seq))\
+    .match(May(_), lambda seq: ("May", seq))\
+    .match(Many(_), lambda seq: ("Many", seq))\
+    .match(MayMany(_), lambda seq: ("MayMany", seq))\
+    .end
+
 
 #eof
