@@ -141,8 +141,31 @@ def parExpr(ps, tokens, e):
   for x in seq:
     (ety, expr) = etype(x)
 
+    if ety is None:
+      (ty, seq2) = ptype(x)
+      r = parExpr(ps, tokens, (ty, seq2))
+      if r is not None:
+        if r == True:
+          ts = ts + 1
+        else:
+          (e, tokens) = r
+          es = es + [e]
+
+        if ty == 'Many' or ty == 'MayMany':
+          while r is not None and r != True:
+            r = parExpr(ps, tokens, (ty, seq2))
+            if r is not None:
+              if r is True:
+                ts = ts + 1
+                incseq = incseq + 1
+              else:
+                (e, tokens) = r
+                es = es + [e]
+                incseq = incseq + 1
+      else: break
+
     # Terminal
-    if ety == 't':
+    elif ety == 't':
       t = x.match(Terminal(_), lambda t: t).end
       if len(tokens) > 0 and tokens[0] == t:
         tokens = tokens[1:]
