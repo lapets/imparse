@@ -29,13 +29,13 @@ def tokenize(ps, s):
   for c in cs:
     seq = c.match(Choice(_, _, _), lambda l,a,seq: seq).end
     for x in seq:
-      if etype(x) == "t":
+      if etype(x) == 'Terminal':
         t = re.escape(x.match(Terminal(_), lambda t: t).end)
         if t not in terminals:
           terminals = terminals + [t]
 
-  tmp = [t for t in re.split(r"(\s+|"+"|".join(terminals)+")[\n]*", s)]
-  tokens = [t for t in tmp if not (t == None or t.isspace() or t == "")]
+  tmp = [t for t in re.split(r'(\s+|'+'|'.join(terminals)+')[\n]*', s)]
+  tokens = [t for t in tmp if not (t == None or t.isspace() or t == '')]
   return tokens
 
 
@@ -92,14 +92,14 @@ def parse(ps, tmp, nt = None, leftFactor = False):
             else: break
 
           # Terminal
-          elif ty == 't':
+          elif ty == 'Terminal':
             if len(tokens) > 0 and tokens[0] == expr:
               tokens = tokens[1:]
               ts = ts + 1
             else: break
 
           # Regular expression
-          elif ty == 'r':
+          elif ty == 'RegExpr':
             if expr[0] == '/' and expr[-1] == '/':
               if len(tokens) > 0 and re.compile(expr[1:-1]).match(tokens[0]):
                 es = es + [tokens[0]]
@@ -107,7 +107,7 @@ def parse(ps, tmp, nt = None, leftFactor = False):
               else: break
           
           # Nonterminal
-          elif ty == 'nt':
+          elif ty == 'Nonterminal':
             if ts + len(es) == 0:
               if expr == nt and leftFactor == True: # Top nonterminal
                 break
@@ -168,7 +168,7 @@ def parExpr(ps, tokens, e):
       else: break
 
     # Terminal
-    elif ety == 't':
+    elif ety == 'Terminal':
       t = x.match(Terminal(_), lambda t: t).end
       if len(tokens) > 0 and tokens[0] == t:
         tokens = tokens[1:]
@@ -176,7 +176,7 @@ def parExpr(ps, tokens, e):
       else: break
 
     # Regular expression
-    elif ety == 'r':
+    elif ety == 'RegExpr':
       regex = x.match(RegExpr(_), lambda r: r).end
       if regex[0] == '/' and regex[-1] == '/':
         if len(tokens) > 0 and re.compile(regex[1:-1]).match(tokens[0]):
@@ -185,7 +185,7 @@ def parExpr(ps, tokens, e):
         else: break
 
     # Nonterminal
-    elif ety == 'nt':
+    elif ety == 'Nonterminal':
       nt = x.match(Nonterminal(_), lambda nt: nt).end
       r = parse(ps, tokens, nt, False)
       if r is not None:
@@ -216,7 +216,7 @@ def parser(grammar, s):
     (p, t) = r
     if len(t) == 0:
       return p
-  print("Syntax error occurred, input could not be parsed.")
+  print('Syntax error occurred, input could not be parsed.')
   return None
 
 
@@ -224,7 +224,7 @@ def parser(grammar, s):
 ## Interaction
 
 def interact():
-  print("Interactive parser. Submit \":q\" or \":quit\" to exit.")
+  print('Interactive parser. Submit \':q\' or \':quit\' to exit.')
   # Interactive loop.
   while True:
     # Prompt the user for a query.
@@ -238,7 +238,7 @@ def interact():
       #print(json.dumps(r, separators = (', ', ': '), indent = 3))
       pprint.pprint(r)
     else:
-      print("Unknown input.")
+      print('Unknown input.')
     print()
 
 
@@ -247,17 +247,17 @@ def interact():
 
 def etype(e):
   return e\
-    .match(Terminal(_), lambda t: ("t", t))\
-    .match(RegExpr(_), lambda r: ("r", r))\
-    .match(Nonterminal(_), lambda nt: ("nt", nt))\
+    .match(Terminal(_), lambda t: ('Terminal', t))\
+    .match(RegExpr(_), lambda r: ('RegExpr', r))\
+    .match(Nonterminal(_), lambda nt: ('Nonterminal', nt))\
     .end
 
 def ptype(e):
   return e\
-    .match(One(_), lambda seq: ("One", seq))\
-    .match(May(_), lambda seq: ("May", seq))\
-    .match(Many(_), lambda seq: ("Many", seq))\
-    .match(MayMany(_), lambda seq: ("MayMany", seq))\
+    .match(One(_), lambda seq: ('One', seq))\
+    .match(May(_), lambda seq: ('May', seq))\
+    .match(Many(_), lambda seq: ('Many', seq))\
+    .match(MayMany(_), lambda seq: ('MayMany', seq))\
     .end
 
 
