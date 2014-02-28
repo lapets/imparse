@@ -1,0 +1,10 @@
+formula ::= And | <formula> `and <formula>
+            Or | <formula> `or <formula>
+            Equal | <number> `== <number>
+            True | `true
+            False | `false
+            Not | `not <formula>
+
+number ::= Plus | <number> `+ <number>
+           Minus | <number> `- <number>
+           Number | $(0|[1-9][0-9]*)

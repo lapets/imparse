@@ -11,6 +11,8 @@
 #######################################################
 
 import re
+import json
+import pprint
 import uxadt as U
 
 exec(open('uxadt.py').read())
@@ -32,7 +34,7 @@ def tokenize(ps, s):
         if t not in terminals:
           terminals = terminals + [t]
 
-  tmp = [t for t in re.split(r"(\s+|"+"|".join(terminals)+")", s)]
+  tmp = [t for t in re.split(r"(\s+|"+"|".join(terminals)+")[\n]*", s)]
   tokens = [t for t in tmp if not (t == None or t.isspace() or t == "")]
   return tokens
 
@@ -66,6 +68,7 @@ def parse(ps, tmp, nt = None, leftFactor = False):
             (ty, expr) = et
 
           if et is None:
+#            print(tokens)
             (ty, seq2) = ptype(x)
             r = parExpr(ps, tokens, (ty, seq2))
             if r is not None:
@@ -184,7 +187,7 @@ def parExpr(ps, tokens, e):
     # Nonterminal
     elif ety == 'nt':
       nt = x.match(Nonterminal(_), lambda nt: nt).end
-      r = parse(ps, tokens, nt2, False)
+      r = parse(ps, tokens, nt, False)
       if r is not None:
         (e, tokens) = r
         es = es + [e]
@@ -205,9 +208,10 @@ def parExpr(ps, tokens, e):
 def parser(grammar, s):
   ps = grammar.match(Grammar(_), lambda ps: ps).end
   tokens = tokenize(ps, s)
+  #print(tokens)
 
   r = parse(ps, tokens)
-#  print('R:', r)
+  #print('R:', r)
   if not r is None:
     (p, t) = r
     if len(t) == 0:
@@ -231,7 +235,8 @@ def interact():
     # Parse the query.
     r = parser(grammar, s)
     if not r is None:
-      print(r)
+      #print(json.dumps(r, separators = (', ', ': '), indent = 3))
+      pprint.pprint(r)
     else:
       print("Unknown input.")
     print()
