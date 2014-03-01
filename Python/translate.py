@@ -11,7 +11,7 @@
 #######################################################
 
 exec(open('imparse.py').read())
-exec(open('convGrammar.py').read())
+exec(open('transGrammar.py').read())
 
 #######################################################
 # Reads a .txt file with a grammar conforming to BNF notation

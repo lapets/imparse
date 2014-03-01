@@ -68,7 +68,6 @@ def parse(ps, tmp, nt = None, leftFactor = False):
             (ty, expr) = et
 
           if et is None:
-#            print(tokens)
             (ty, seq2) = ptype(x)
             r = parExpr(ps, tokens, (ty, seq2))
             if r is not None:
