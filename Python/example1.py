@@ -34,6 +34,6 @@ grammar = Grammar([\
  ])
 
 ## Launch interactive parser.
-#interact()
+interact()
 
 #eof

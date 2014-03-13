@@ -10,7 +10,7 @@
 ##
 #######################################################
 
-exec(open('imparse.py').read())
+exec(open('imparse7.py').read())
 
 grammar = Grammar([\
   Production('Grammar', [\
@@ -23,7 +23,7 @@ grammar = Grammar([\
   Production('Production', [\
     Choices([\
       Choice('Production', AssocNone(), [\
-        RegExpr('/[a-z][A-Za-z]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
+        RegExpr('/[A-Z][A-Za-z]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
         ]),\
       ])\
     ]),\
@@ -56,11 +56,11 @@ grammar = Grammar([\
     Choices([\
       # Terminal
       Choice('Terminal', AssocNone(), [\
-        RegExpr('/([^\s`][^\s]+)/'),\
+        RegExpr('/([^\s`\'\"\$\[\{][^\s`\'\"\$]+)/'),\
         ]),\
       # Nonterminals
       Choice('Nonterminal', AssocNone(), [\
-        RegExpr('/<([A-Z][A-Za-z0-9]*)>/'),\
+        RegExpr('/`([A-Z][A-Za-z0-9]*)/'),\
         ]),\
       # Regular Expression 
       Choice('RegExpr', AssocNone(), [RegExpr('/\$([^\s]*)\$/')]),\
