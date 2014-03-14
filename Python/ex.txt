@@ -5,6 +5,6 @@ Formula ::= And | `Formula and `Formula
             False | false
             Not | not `Formula
 
-Number ::= Plus | `Number + `Number
+Number ::= Plus | `Number "+" `Number
            Minus | `Number - `Number
            Number | $(0|[1-9][0-9]*)$

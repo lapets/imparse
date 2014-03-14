@@ -1,7 +1,7 @@
 
 #######################################################
 ##
-## Example1.py
+## Example.py
 ##
 ## Example of a grammar implementation.
 ##

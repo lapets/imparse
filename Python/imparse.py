@@ -78,7 +78,21 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
 #    print('Expr:', ety, '\t', expr)
 #    print('Tokens:', tokens)
 
-    if ety in ['One', 'May', 'Many', 'MayMany']:
+    if ety == 'One':
+      seqlist = expr
+      for s in seqlist:
+        r = parExpr(ps, tokens, s)
+        if r is not None:
+          (e, tokens) = r
+          if e == []:
+            ts = ts + 1
+            break
+          else:
+            es = es + [e]
+            break
+      if r is None: break
+
+    elif ety in ['May', 'Many', 'MayMany']:
       may = True if ety == 'May' or ety == 'MayMany' else False
       seq2 = expr
       r = parExpr(ps, tokens, seq2)
@@ -93,7 +107,7 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
         if may == True:
           ts = ts + 1
         else: break
-
+      # Many/MayMany
       if ety == 'Many' or ety == 'MayMany':
 #        print('INSIDE IF STATEMENT~~~~~~~~~~~~~~~~~')
         while r is not None:
@@ -163,13 +177,18 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
 
 def parser(grammar, s):
   ps = grammar.match(Grammar(_), lambda ps: ps).end
-  tokens = tokenize(ps, s)
+  if type(s) == str:
+    tokens = tokenize(ps, s)
+  else:
+    tokens = s
   #print(tokens)
 
   r = parse(ps, tokens)
   print('R:', r)
   if not r is None:
     (p, t) = r
+    pprint.pprint(p)
+    print(t)
     if len(t) == 0:
       return p
   print('Syntax error occurred, input could not be parsed.')

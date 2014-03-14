@@ -10,12 +10,14 @@
 ##
 #######################################################
 
-exec(open('imparse7.py').read())
+exec(open('imparse.py').read())
 
 grammar = Grammar([\
   Production('Grammar', [\
     Choices([\
-      Choice('Grammar', AssocNone(), [Many([Nonterminal('Production')])]),\
+      Choice('Grammar', AssocNone(), [\
+        Many([Nonterminal('Production')]),\
+        ]),\
       ]),\
     ]),\
 
@@ -23,7 +25,8 @@ grammar = Grammar([\
   Production('Production', [\
     Choices([\
       Choice('Production', AssocNone(), [\
-        RegExpr('/[A-Z][A-Za-z]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
+        #RegExpr('/[A-Z][A-Za-z0-9]*[ ]::=/'), Many([Nonterminal('Choice')]),\
+        RegExpr('/[A-Z][A-Za-z0-9]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
         ]),\
       ])\
     ]),\
@@ -45,7 +48,9 @@ grammar = Grammar([\
         Terminal('['), Many([Nonterminal('Expression')]), Terminal(']')\
         ]),\
       # MayMany
-      Choice('MayMany', AssocNone(), [Nonterminal('Expression'), Terminal('*')]),\
+      Choice('MayMany', AssocNone(), [\
+        Nonterminal('Expression'), Terminal('*'),\
+        ]),\
       Choice('MayMany', AssocNone(), [\
         Terminal('{'), Many([Nonterminal('Expression')]), Terminal('}')\
         ]),\
@@ -56,16 +61,24 @@ grammar = Grammar([\
     Choices([\
       # Terminal
       Choice('Terminal', AssocNone(), [\
-        RegExpr('/([^\s`\'\"\$\[\{][^\s`\'\"\$]+)/'),\
+        RegExpr('/\"([*+\(\)\{\}\[\]\|])\"'),\
+#        RegExpr('/\"\*\"'),\
+        ]),\
+      Choice('Terminal', AssocNone(), [\
+        RegExpr('/([^A-Z`\*\+\(\)\{\}\[\]\|][^\s`\*\+\(\)\{\}\[\]\|]*)/'),\
         ]),\
       # Nonterminals
       Choice('Nonterminal', AssocNone(), [\
         RegExpr('/`([A-Z][A-Za-z0-9]*)/'),\
         ]),\
       # Regular Expression 
-      Choice('RegExpr', AssocNone(), [RegExpr('/\$([^\s]*)\$/')]),\
+      Choice('RegExpr', AssocNone(), [\
+        RegExpr('/\$[^$]+\$/'),\
+        ]),\
       # Empty String
-      Choice('Empty String', AssocNone(), [Terminal('\"\"')]),\
+      Choice('Empty String', AssocNone(), [\
+        Terminal('\"\"'),\
+        ]),\
       ]),\
 
     Choices([\
