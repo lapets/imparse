@@ -1,6 +1,6 @@
 #######################################################
 ##
-## ConvGrammar.py
+## GenGrammar.py
 ##
 ## A cross-platform parser library.
 ##
@@ -13,6 +13,17 @@
 exec(open('imparse.py').read())
 
 grammar = Grammar([\
+  # Comments
+  Production('Comment', [\
+    Choices([\
+      Choice('Comment', AssocNone(), [\
+#        Terminal('/*'), Many([Nonterminal('Production')]), Terminal('*/')\
+        RegExpr('/#[^#]+/'),\
+        ]),\
+      ]),\
+    ]),\
+
+  # Grammar 
   Production('Grammar', [\
     Choices([\
       Choice('Grammar', AssocNone(), [\
@@ -26,6 +37,7 @@ grammar = Grammar([\
     Choices([\
       Choice('Production', AssocNone(), [\
         #RegExpr('/[A-Z][A-Za-z0-9]*[ ]::=/'), Many([Nonterminal('Choice')]),\
+        May([Nonterminal('Comment')]),\
         RegExpr('/[A-Z][A-Za-z0-9]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
         ]),\
       ])\
@@ -35,12 +47,13 @@ grammar = Grammar([\
   Production('Choice', [\
     Choices([\
       Choice('Choice', AssocNone(), [\
+        #May([Nonterminal('Comment')]),\
         RegExpr('/[A-Z][A-Za-z]*/'), Terminal('|'), Many([Nonterminal('Expression')])\
         ]),\
       ]),\
     ]),\
 
-  # Operation
+  # Expressions 
   Production('Expression', [\
     Choices([\
       # May
@@ -59,25 +72,26 @@ grammar = Grammar([\
       ]),\
 
     Choices([\
-      # Terminal
-      Choice('Terminal', AssocNone(), [\
-        RegExpr('/\"([*+\(\)\{\}\[\]\|])\"'),\
-#        RegExpr('/\"\*\"'),\
-        ]),\
-      Choice('Terminal', AssocNone(), [\
-        RegExpr('/([^A-Z`\*\+\(\)\{\}\[\]\|][^\s`\*\+\(\)\{\}\[\]\|]*)/'),\
+      # Regular Expression 
+      Choice('RegExpr', AssocNone(), [\
+        RegExpr('/\$[^$]+\$/'),\
         ]),\
       # Nonterminals
       Choice('Nonterminal', AssocNone(), [\
         RegExpr('/`([A-Z][A-Za-z0-9]*)/'),\
         ]),\
-      # Regular Expression 
-      Choice('RegExpr', AssocNone(), [\
-        RegExpr('/\$[^$]+\$/'),\
-        ]),\
       # Empty String
       Choice('Empty String', AssocNone(), [\
         Terminal('\"\"'),\
+        ]),\
+      # Terminal
+      Choice('Terminal', AssocNone(), [\
+        RegExpr('/\"([#*+\$\(\)\{\}\[\]\|])\"'),\
+#        RegExpr('/\"\*\"'),\
+        ]),\
+      Choice('Terminal', AssocNone(), [\
+        #RegExpr('/([^A-Z#`$*+\(\)\{\}\[\]\|][^\s#`$*+\(\)\{\}\[\]\|]*)/'),\
+        RegExpr('/([^A-Z#`*+\$\(\)\{\}\[\]\|][^\s*+]*)/'),\
         ]),\
       ]),\
 

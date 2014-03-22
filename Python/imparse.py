@@ -56,11 +56,13 @@ def parse(ps, tmp, nt = None, leftFactor = False):
         if len(tmp) == 0:
           if len(seq) == 0:
             return (label, [])
+#        print('\n~~~~~~~~~~~', label)
         r = parExpr(ps, tokens, seq, label, (nt, pnt), leftFactor)
+#        print('parse R:',r)
         if r is not None and r != True:
-#          print('r in parse:', r)
-          (e, tokens) = r
-          es = es + [e]
+#          (e, tokens) = r
+#          print('parse R(e):',e)
+#          es = es + [e]
           return r
 
 
@@ -75,8 +77,8 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
   inseq = 0
   for x in seq:
     (ety, expr) = etype(x)
-#    print('Expr:', ety, '\t', expr)
-#    print('Tokens:', tokens)
+#    print('\nExpr:', ety, '\t', expr)
+#    print(tokens, '\n')
 
     if ety == 'One':
       seqlist = expr
@@ -99,6 +101,7 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
 #      print('R in May/Many/etc:\t', r, '\n')
       if r is not None:
         (e, tokens) = r
+#        print('new tokens', tokens)
         if e == []:
           ts = ts + 1
         else:
@@ -110,7 +113,7 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
       # Many/MayMany
       if ety == 'Many' or ety == 'MayMany':
 #        print('INSIDE IF STATEMENT~~~~~~~~~~~~~~~~~')
-        while r is not None:
+        while r is not None and len(tokens) > 0:
 #          print('Loop tokens', tokens)
           r = parExpr(ps, tokens, seq2)
 #          print('R', r)
@@ -184,11 +187,15 @@ def parser(grammar, s):
   #print(tokens)
 
   r = parse(ps, tokens)
-  print('R:', r)
+#  print('R:', r)
   if not r is None:
     (p, t) = r
-    pprint.pprint(p)
-    print(t)
+    if len(t) < 10:
+      print(t)
+    else:
+      print(t[:10])
+#    pprint.pprint(p)
+#    print(t)
     if len(t) == 0:
       return p
   print('Syntax error occurred, input could not be parsed.')
@@ -198,8 +205,10 @@ def parser(grammar, s):
 #######################################################
 ## Interaction
 
-def interact():
+def interact(u = None):
   print('Interactive parser. Submit \':q\' or \':quit\' to exit.')
+  if u is not None:
+    grammar = u
   # Interactive loop.
   while True:
     # Prompt the user for a query.

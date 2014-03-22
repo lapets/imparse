@@ -1,267 +1,86 @@
-##### CREDIT : http://cui.unige.ch/isi/bnf/JAVA/
-
-
-Arglist ::=
-  Arglist | `Expression { , `Expression }
-
-## Needs to update for One(_) here
-Bit_expression ::=
-  BitNegate | ( - `Expression )
-  BitExpr | ( `Expression >>= `Expression` )
-  BitShiftRight | ( `Expression >> `Expression` )
-  BitShiftLeft | ( `Expression << `Expression` )
-  BitExpr | ( `Expression >>> `Expression` )
-
-Casting_expression ::=
-  Cast | ( `Type ) `Expression
-
-Character ::=
-  Char | $([^\s]*)
-
 Class_declaration ::=
-  Class | { `Modifier } class `Identifier [ extends `Class_name ] { , `Interface_name } ] "{" { `Field_declarationr } "}" 
+  Class | [ `Modifier ] class `Class_name "{" { `Field_declaration } "}"
+  NewObject | new `Class_name "(" [ `Expression { , `Expression } ] ")"
 
 Class_name ::=
-  ClassName | `Identifier
-  ClassName | ( `Package_name . `Identifier )
-
-Compilation_unit ::=
-  CompUnit | [ `Package_statement ] { `Import_statement } { `Type_declaration }
-
-Constructor_declaration ::=
-  Constructor | { `Modifer } `Identifier "(" [ `Paramter_list ] ")" `Statement_block
-
-## Needs to update for One(_) here
-Creating_expression ::=
-  NewExpr | new (
-    ( `Class_name "(" [ `Arglist ] ")" )
-    ~~OR~~ ( `Type_specifier [ "[" `Expression "]" ] { "[" "]" } )
-    ~~OR~~ ( "(" `Expression ")" )
-    )
-
-Decimal_digits ::=
-  Digit | $([0-9]*)
-
-Doc_comment ::=
-  Comment | $/\*([^\*/]*)\*/
-
-Do_statement ::=
-  Do | do `Statement while "(" `Expression ")" ;
-
-Exponent_part ::=
-  Exponent | e [ + ~~OR~~ - ] `Decimal_digits
+  ClassName | $[A-Z][A-Za-z0-9]*$
 
 Expression ::=
-  NumExpr | `Numeric_expression
-  TestExpr | `Testing_expression
-  LogicalExpr | `Logical_expression
-  StringExpr | `String_expression
-  BitExpr | `Bit_expression
-  CastingExpr | `Casting_expression
-  Creating_Expr | `Creating_expression
-  LiteralExpr | `Literal_expression
+  Plus | `Expression "+" `Expression
+  Minus | `Expression - `Expression
+  Multiply | `Expression "*" `Expression
+  Divide | `Expression / `Expression
+
+  GreaterThan | `Expression > `Expression
+  GreaterThanEqual | `Expression >= `Expression
+  LessThan | `Expression < `Expression
+  LessThanEqual | `Expression <= `Expression
+  Equal | `Expression == `Expression
+  NotEqual | `Expression != `Expression
+
+  And | `Expression && `Expression
+  Or | `Expression "|""|" `Expression
+  Xor | `Expression ^ `Expression 
+
   Null | null
-  Super | super
-  This | this
-  Identifier | `Identifier
-  Expr | ( "(" `Expression ")" )
-  Expr | ( `Expression
-    (
-    ( "(" [ `Arglist ] ")" )
-    ~~OR~~ ( "[" `Expression "]" )
-    ~~OR~~ ( . `Expression )
-    ~~OR~~ ( , `Expression )
-    ~~OR~~ ( instanceof ( `Class_name ~~OR ~~ `Interface_name ) )
-    ) )
-
-Field_declaration ::=
-  Field | ( [ `Doc_comment ]
-    (
-    `Method_declataion
-    ~~OR~~ `Constructor_declaration
-    ~~OR~~ `Variable_declaration
-    ) )
-  FieldStaticInit | `Static_initializer
-  End?? | ;
-
-Float_literal ::=
-  Float | (`Decimal_digits . [ `Decimal_digits ] [ `Exponent_part ] [ `Float_type_suffix ] )
-  Float | ( . `Decimal_digits [ `Exponent_part ] [ `Float_type_suffix ] )
-  Float | (`Decimal_digits [ `Exponent_part ] [ `Float_type_suffix ] )
-
-Float_type_suffix ::=
-  FloatType | f
-  FloatType | d
-
-For_statement ::=
-  For | for "(" ( `Variable_declaration ~~OR~~ ( `Expression ; ) ~~OR~~ ; ) [ `Expression ] ; [ `Expression ] ; ")" `Statement
-
-Identifier ::=
-  Identifier | $[A-Za-z\$_][A-Za-z0-9\$_]*
-
-If_statement ::=
-  If | if "(" `Expression ")" `Statement [ else `Statement ]
-
-Import_statement ::=
-  Import | import ( ( `Package_name . "*" ; ) ~~OR~~ ( `Class_name ~~OR~~ `Interface_name ) ) ;
-
-Integer_literal ::=
-  Integer | $([1-9][0-9]+|[0-9]*)
-  HexInteger | $([0][xX][0-9A-Fa-f][0-9A-Fa-f]+)
-  Integer | l
-
-Interface_declaration ::=
-  Interface | { `Modifier } interface `Identifier [ extends `Interface_name { , `Interface_name } ] "{" { `Field_declaration } "}"
-
-Interface_name ::=
-  InterfaceName | `Identifier
-  InterfaceName | ( `Package_name . `Identiifer )
-
-Literal_expression ::=
-  IntegerLiteral | `Integer_literal
-  FloatLiteral | `Float_literal
-  String | `String
-  Char | `Character
-
-Logical_expression ::=
-  Not | ( ! `Expression )
-  And | ( `Expression && `Expression )
-  BitAnd | ( `Expression & `Expression ) 
-  AndEquals | ( `Expression &= `Expression ) 
-  Or | ( `Expression || `Expression )
-  BitOr | ( `Expression "|" `Expression ) 
-  OrEquals | ( `Expression |= `Expression ) 
-  Xor | ( `Expression "^" `Expression ) 
-  XorEquals | ( `Expression ^= `Expression ) 
-  Mod | (`Expression % `Expression )
-  ModEquals | (`Expression %= `Expression )
-  If | (`Expression ? `Expression : `Expression )
   True | true
   False | false
 
-Method_declaration ::=
-  Method | { `Modifier } `Type `Identifier "(" [ `Parameter_list ] ")" { "[" "]" } ( `Statement_block ~~OR~~ ; )
+  None | "(" `Expression ")"
+  Cast | "(" `Type ")" `Expression
+  Negate | - `Expression
+  Not | ! `Expression
+
+  Variable | $[A-Za-z][A-Za-z0-9]*$
+  Integer | $(0|[1-9][0-9]*)$
+  Char | $(\'[^\s]\')$
+  String | $(\'[^\s]*\')$
+
+Field_declaration ::=
+  GlobalVariable | `Variable_declaration ;
+  Method | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ "(" [ `Parameter_list ] ")" `Statement_block
+  Method | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ "(" [ `Parameter_list ] ")" ;
+  Constructor | [ `Modifer ] `Class_name "(" [ `Parameter_list ] ")" `Statement_block
+
+Import_statement ::=
+  Import | import `Class_name ;
 
 Modifier ::=
-  Public | public
+  Modifier | { `Modifier_type }
+
+Modifier_type ::=
+  Public | public 
   Private | private
-  Protected | protected
   Static | static
-  Final | final
-  Native | native
-  Synchronized | synchronized
-  Abstract | abstract
-  Threadsafe | threadsafe
-  Transient | transient
-
-Numberic_expression ::=
-  Negative | ( - `Expression )
-  Plus | ( `Expression + `Expression )
-  PlusOne | ( ++ `Expression )
-  PlusOne | ( `Expression ++ )
-  PlusEquals | ( `Expression += `Expression )
-  Minus | ( `Expression - `Expression )
-  MinusOne | ( -- `Expression )
-  MinusOne | ( `Expression -- )
-  MinusEquals | ( `Expression -= `Expression )
-  Multiply | ( `Expression * `Expression )
-  MultiplyEquals | ( `Expression *= `Expression )
-  Divide | ( `Expression / `Expression )
-  DivideEquals | ( `Expression /= `Expression )
-  Mod | ( `Expression % `Expression )
-  ModEquals | ( `Expression %= `Expression )
-
-Package_name ::=
-  PackageName | `Identifier
-  PackageName | ( `Package_name . `Identifier )
-
-Package_statement ::=
-  PackageStatement | package `Package_name ;
-
-Parameter ::=
-  Parameter | `Type `Identifer { "[" "]" }
 
 Parameter_list ::=
-  ParameterList | `Paramater { ,`Parameter }
+  ParameterList | `Type $[A-Za-z][A-Za-z0-9]*$ { , `Type $[A-Za-z][A-Za-z0-9]*$ }
 
 Statement ::=
-  Variable | `Variable_declaration
-  Stmt | ( `Expression ; )
-  StmtBlock | ( `Statement_block )
-  If | ( `If_statement )
-  Do | ( `Do_statement )
-  While | ( `While_statement )
-  For | ( `For_statement )
-  Try | ( `Try_statement )
-  Switch | ( `Switch_statement )
-  Synchronized | ( synchronized "(" `Expression ")" `Statement )
-  Return | ( return [ `Expression ] ; )
-  Throw | ( throw `Expression ; )
-  IdStmt | ( `Identifier : `Statement )
-  Break | ( break [ `Identifier ] ; )
-  Continue | ( continue [ `Identifier ] ; )
-  End | ( ; )
+  None | `Variable_declaration ;
+  Stmt | `Expression ;
+  StmtBlock | `Statement_block
+  If | if "(" `Expression ")" `Statement [ else `Statement ]
+  Do | do `Statement while "(" `Expression ")" ;
+  While | while "(" `Expression ")" `Statement
+  For | for "(" `Variable_declaration ; [ `Expression ] ; [ `Expression ] ; ")" `Statement
+  For | for "(" [ `Expression ] ; [ `Expression ] ; [ `Expression ] ; ")" `Statement
+  Return | return [ `Expression ] ;
+  Break | break ;
+  Continue | continue ;
+  EndStmt | ;
 
 Statement_block ::=
   StmtBlock | "{" { `Statement } "}"
 
-Static_initializer ::= 
-  Static | static `Statement_block 
-
-String ::=
-  String | $[\'[^\s]*\']
-
-String_expression ::=
-  StringConcat | ( `Expression + `Expression )
-  StringConcatEquals | ( `Expression += `Expression )
-
-Switch_statement ::= 
-  Switch | switch "(" `Expression ")"
-    "{" {
-    ( case `Expression : )
-    ~~OR~~ ( default : ) 
-    ~~OR~~ `Statement
-    } "}"
-
-Testing_expression ::=
-  GreaterThan | ( `Expression > `Expression )
-  GreaterThanEqual | ( `Expression >= `Expression )
-  LessThan | ( `Expression < `Expression )
-  LessThanEqual | ( `Expression <= `Expression )
-  Equal | ( `Expression == `Expression )
-  NotEqual | ( `Expression != `Expression )
-
-Try_statement ::=
-  Try | try `Statement { catch "(" `Parameter ")" `Statement } [ finally `Statement }
-
 Type ::=
-  Type | `Type_specifier { "[" "]" }
-
-Type_declaration ::=
-  TypeDec | [ `Doc_comment ] `Class_declaration ;
-  TypeDec | [ `Doc_comment ] `Interface_declaration ;
-
-Type_specifier ::=
+  Void | void
   Boolean | boolean
-  Byte | byte
   Char | char
-  Short | short
   Int | int
-  Float | float
-  Long | long
   Double | double
-  ClassType | `Class_name
-  InterfaceType | `Interface_name
+  ClassType | $[A-Z][A-Za-z0-9]*$
 
 Variable_declaration ::=
-  Variable | { `Modifier } `Type `Variable_declarator { , `Variable_declarator } ;
-
-Variable_declarator ::=
-  VariableDeclarator | `Identifier { "[" "]" } [ = `Variable_initializer ]
-
-Variable_initializer ::=
-  VarInit | `Expression
-  VarInit | ( "{" [ `Variable_initializer { , `Variable_initializer } [ , ] ] "}" )
-
-While_statement ::=
-  While | while "(" `Expression ")" `Statement
+  Object | [ `Modifier ] `Type $[A-Z][A-Za-z0-9]*$ [ = `Expression ]
+  Variable | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ [ = `Expression ]

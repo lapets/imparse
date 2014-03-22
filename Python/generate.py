@@ -1,8 +1,9 @@
 #######################################################
 ##
-## Conv.py
+## Generate.py
 ##
 ## A cross-platform parser library.
+## Generates BNF grammars into UxADT.
 ##
 ##    Web:     imparse.org
 ##    Version: 0.0.0.4
@@ -11,11 +12,11 @@
 #######################################################
 
 exec(open('imparse.py').read())
-exec(open('transGrammar.py').read())
+exec(open('genGrammar.py').read())
 
 #######################################################
 # Reads a .txt file with a grammar conforming to BNF notation
-# and transforms to UxADT
+# and transforms it to UxADT
 
 def bnfToUxadt(bnfFile):
   tokens = bnfTokenize(bnfFile)
@@ -26,22 +27,47 @@ def bnfToUxadt(bnfFile):
     return r1
   return None
 
+def printTokens(tokens):
+  c = 0
+  for t in tokens:
+    print(c, ' - ', t)
+    c = c + 1
+
 def bnfTokenize(bnfFile):
   bnf = open(bnfFile)
-  tmp = []
-  spec = '\*\+\(\)\{\}\[\]'
-  regex = '\{|\}|\(|\)|\[|\]|\||\*|\+|::=|\"[' + spec + ']\"|\$[^$]+\$|[^\s' + spec + ']+'
+
+  reserved = '#\$\*\+\(\)\{\}\[\]\|' # Reserved characters 
+  comment = '#[^#]+'
+  #comment = '/\*[^(\*/)]+\*/'
+  regExpr = '\$[^$]+\$'
+  termRes = '\\\"[' + reserved + ']\\\"' # Reserved characters as terminals
+  termNT = '::=|[^\s' + reserved + ']+' # Terminals and nonterminals
+  #termNT = '::=|[^\s' + reserved + '][^\s]*' # Terminals and nonterminals
+
+  regex = '|'.join([\
+    comment,\
+    regExpr,\
+    ('[' + reserved + ']'),\
+    termRes,\
+    termNT,\
+    ])
+
+#  print(regex)
   regex = re.compile(regex)
+
+  tmp = []
   for line in bnf:
     tmp = tmp + regex.findall(line)
   tokens = [t for t in tmp if not (t == None or t.isspace() or t == '')]
   bnf.close()
+#  print(tokens)
   return tokens
 
 
-def toUxadt(g):
+def toUxadt(ptree):
+  #print('\n')
   # Unwrap
-  ps = g['Grammar']
+  ps = ptree['Grammar']
   ps2 = []
 
   for p in ps:
@@ -71,8 +97,16 @@ def toUxadtExpr(es):
   ty = list(es.keys())[0]
   x = es[ty][0]
 
-  if ty == 'Terminal':
-    x = x[1] if len(x) == 3 and x[0] == '\"' and x[-1] == '\"' else x 
+  if ty == 'Comment':
+    while x[0] == '#' or x[0].isspace():
+      x = x[1:]
+    if x[-1] == '\n':
+      x = x[:-1]
+    cs = cs + [Comment(x)]
+  elif ty == 'Terminal':
+    #x = x[1] if len(x) == 3 and x[0] == '\"' and x[-1] == '\"' else x 
+    if len(x) == 3 and x[0] == '\"' and x[-1] == '\"':
+      x = x[1]
     cs = cs + [Terminal(x)]
   elif ty == 'Nonterminal':
     cs = cs + [Nonterminal(x[1:])]
@@ -81,16 +115,22 @@ def toUxadtExpr(es):
   elif ty == 'RegExpr':
     s = '/' + x[1:-1] + '/'
     cs = cs + [RegExpr(s)]
-  # May/Many/MayMany
+  # One/May/Many/MayMany
+  elif ty == 'One':
+    cs = cs + [One(toUxadtExpr(x))]
   elif ty == 'May':
-    cs = cs + [May(toUxadtExpr(x))]
+    for e in es[ty]:
+      cs = cs + [May(toUxadtExpr(e))]
   elif ty == 'Many':
-    cs = cs + [Many(toUxadtExpr(x))]
+    for e in es[ty]:
+      cs = cs + [Many(toUxadtExpr(e))]
   elif ty == 'MayMany':
-    cs = cs + [MayMany(toUxadtExpr(x))]
+    for e in es[ty]:
+      cs = cs + [MayMany(toUxadtExpr(e))]
   # Group
   elif ty == 'Group':
-    cs = cs + toUxadtExpr(x)
+    for e in es[ty]:
+      cs = cs + toUxadtExpr(e)
 
   return cs
 
