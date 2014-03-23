@@ -1,6 +1,5 @@
 Class_declaration ::=
   Class | [ `Modifier ] class `Class_name "{" { `Field_declaration } "}"
-  NewObject | new `Class_name "(" [ `Expression { , `Expression } ] ")"
 
 Class_name ::=
   ClassName | $[A-Z][A-Za-z0-9]*$
@@ -12,11 +11,11 @@ Expression ::=
   Divide | `Expression / `Expression
 
   GreaterThan | `Expression > `Expression
-  GreaterThanEqual | `Expression >= `Expression
+  GreaterThanEq | `Expression >= `Expression
   LessThan | `Expression < `Expression
-  LessThanEqual | `Expression <= `Expression
-  Equal | `Expression == `Expression
-  NotEqual | `Expression != `Expression
+  LessThanEq | `Expression <= `Expression
+  Eq | `Expression == `Expression
+  NotEq | `Expression != `Expression
 
   And | `Expression && `Expression
   Or | `Expression "|""|" `Expression
@@ -31,22 +30,22 @@ Expression ::=
   Negate | - `Expression
   Not | ! `Expression
 
+  Call | `Method_name "(" [ `Parameter_list ] ")"
   Variable | $[A-Za-z][A-Za-z0-9]*$
   Integer | $(0|[1-9][0-9]*)$
   Char | $(\'[^\s]\')$
-  String | $(\'[^\s]*\')$
+  String | $(\"[^\s]*\")$
 
 Field_declaration ::=
-  GlobalVariable | `Variable_declaration ;
-  Method | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ "(" [ `Parameter_list ] ")" `Statement_block
-  Method | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ "(" [ `Parameter_list ] ")" ;
-  Constructor | [ `Modifer ] `Class_name "(" [ `Parameter_list ] ")" `Statement_block
+  Global | `Variable_declaration ;
+  Method | [ `Modifier ] `Return_type `Method_name "(" [ `Parameter_list ] ")" "{" { `Statement } "}"
+  Constructor | [ `Modifer ] `Class_name "(" [ `Parameter_list ] ")" "{" { `Statement } "}"
 
 Import_statement ::=
   Import | import `Class_name ;
 
 Modifier ::=
-  Modifier | { `Modifier_type }
+  Modifier | `Modifier_type+
 
 Modifier_type ::=
   Public | public 
@@ -54,21 +53,23 @@ Modifier_type ::=
   Static | static
 
 Parameter_list ::=
-  ParameterList | `Type $[A-Za-z][A-Za-z0-9]*$ { , `Type $[A-Za-z][A-Za-z0-9]*$ }
+  ParameterList | `Variable_declaration { , `Variable_declaration }
+  ParameterList | `Expression { , `Expression }
+
+Return_type ::=
+  ReturnType | `Type
 
 Statement ::=
-  None | `Variable_declaration ;
-  Stmt | `Expression ;
-  StmtBlock | `Statement_block
-  If | if "(" `Expression ")" `Statement [ else `Statement ]
-  Do | do `Statement while "(" `Expression ")" ;
-  While | while "(" `Expression ")" `Statement
-  For | for "(" `Variable_declaration ; [ `Expression ] ; [ `Expression ] ; ")" `Statement
-  For | for "(" [ `Expression ] ; [ `Expression ] ; [ `Expression ] ; ")" `Statement
+  Equals | `Variable_name = `Expression ;
+  None | `Expression ;
+  If | if "(" `Expression ")" "{" { `Statement } "}" [ else "{" { `Statement } "}" ]
+  Do | do "{" { `Statement } "}" while "(" `Expression ")" ;
+  While | while "(" `Expression ")" "{" { `Statement } "}"
+  For | for "(" `Variable_declaration ; [ `Expression ] ; [ `Expression ] ; ")" "{" { `Statement } "}"
+  For | for "(" [ `Expression ] ; [ `Expression ] ; [ `Expression ] ; ")" "{" { `Statement } "}"
   Return | return [ `Expression ] ;
   Break | break ;
   Continue | continue ;
-  EndStmt | ;
 
 Statement_block ::=
   StmtBlock | "{" { `Statement } "}"
@@ -77,10 +78,16 @@ Type ::=
   Void | void
   Boolean | boolean
   Char | char
-  Int | int
+  Integer | int
   Double | double
-  ClassType | $[A-Z][A-Za-z0-9]*$
+  Object | $[A-Z][A-Za-z0-9]*$
 
 Variable_declaration ::=
-  Object | [ `Modifier ] `Type $[A-Z][A-Za-z0-9]*$ [ = `Expression ]
-  Variable | [ `Modifier ] `Type $[a-z][A-Za-z0-9]*$ [ = `Expression ]
+  InitVariable | [ `Modifier ] `Type `Variable_name [ = `Expression ]
+  InitVariable | [ `Modifier ] new `Type "(" [ `Expression { , `Expression } ] ")"
+
+Variable_name ::=
+  Variable | $[A-Za-z][A-Za-z0-9]*$
+
+Method_name ::=
+  MethodName | $[a-z][A-Za-z0-9]*$

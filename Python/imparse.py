@@ -22,20 +22,33 @@ exec(open('definitions.py').read())
 
 ## Tokenizer
 def tokenize(ps, s):
-  terminals = []
   cbs = [cb for p in ps for cb in p.match(Production(_, _), lambda nt,cbs: cbs).end]
   cs = [c for cb in cbs for c in cb.match(Choices(_), lambda cs: cs).end]
+  terminals = []
   for c in cs:
-    seq = c.match(Choice(_, _, _), lambda l,a,seq: seq).end
-    for x in seq:
-      if etype(x) == 'Terminal':
-        t = re.escape(x.match(Terminal(_), lambda t: t).end)
-        if t not in terminals:
-          terminals = terminals + [t]
-
+    (l, seq) = c.match(Choice(_, _, _), lambda l,a,seq: (l, seq)).end
+    r = tok(seq)
+    if len(r) > 0:
+      terminals = terminals + [t for t in r if t not in terminals]
   tmp = [t for t in re.split(r'(\s+|'+'|'.join(terminals)+')[\n]*', s)]
   tokens = [t for t in tmp if not (t == None or t.isspace() or t == '')]
+#  print('tokens:', tokens)
   return tokens
+    
+def tok(seq):
+  terminals = []
+  for x in seq:
+    (ty, e) = etype(x)
+    if ty == 'Terminal':
+      t = re.escape(e)
+#      t = re.escape(x.match(Terminal(_), lambda t: t).end)
+      if t not in terminals:
+        terminals = terminals + [t]
+    elif ty in ['May', 'Many', 'MayMany']:
+      r = tok(e)
+      if len(r) > 0:
+        terminals = terminals + r
+  return terminals
 
 
 def parse(ps, tmp, nt = None, leftFactor = False):
@@ -56,13 +69,8 @@ def parse(ps, tmp, nt = None, leftFactor = False):
         if len(tmp) == 0:
           if len(seq) == 0:
             return (label, [])
-#        print('\n~~~~~~~~~~~', label)
         r = parExpr(ps, tokens, seq, label, (nt, pnt), leftFactor)
-#        print('parse R:',r)
         if r is not None and r != True:
-#          (e, tokens) = r
-#          print('parse R(e):',e)
-#          es = es + [e]
           return r
 
 
@@ -70,15 +78,10 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
   (ts, es, pnt) = (0, [], None)
   if nt is not None:
     (nt, pnt) = nt
-#    print('\nnew call -- NT:', nt, '\tPNT:', pnt)
-#  else:
-#    print('\nnew call -- NT:', nt)
 
   inseq = 0
   for x in seq:
     (ety, expr) = etype(x)
-#    print('\nExpr:', ety, '\t', expr)
-#    print(tokens, '\n')
 
     if ety == 'One':
       seqlist = expr
@@ -98,10 +101,8 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
       may = True if ety == 'May' or ety == 'MayMany' else False
       seq2 = expr
       r = parExpr(ps, tokens, seq2)
-#      print('R in May/Many/etc:\t', r, '\n')
       if r is not None:
         (e, tokens) = r
-#        print('new tokens', tokens)
         if e == []:
           ts = ts + 1
         else:
@@ -110,13 +111,9 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
         if may == True:
           ts = ts + 1
         else: break
-      # Many/MayMany
       if ety == 'Many' or ety == 'MayMany':
-#        print('INSIDE IF STATEMENT~~~~~~~~~~~~~~~~~')
         while r is not None and len(tokens) > 0:
-#          print('Loop tokens', tokens)
           r = parExpr(ps, tokens, seq2)
-#          print('R', r)
           if r is not None:
             (e, tokens) = r
             if e == []:
@@ -125,7 +122,6 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
             else:
               es = es + [e]
               inseq = inseq + 1
-#          print('End loop tokens', tokens)
 
     # Terminal
     elif ety == 'Terminal':
@@ -148,13 +144,10 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
         if expr == nt and leftFactor: # Top nonterminal
           break
         elif expr == pnt:
-#          print('expr = pnt', expr, '==', pnt)
           r = parse(ps, tokens, expr, True)
         else:
-#          print('expr != pnt', expr, '!=', pnt)
           r = parse(ps, tokens, expr, False)
       else: # Nonterminal is not the first element of the choice
-#        print('else', expr, tokens)
         r = parse(ps, tokens, expr, False)
 
       if r is not None:
@@ -165,16 +158,12 @@ def parExpr(ps, tokens, seq, label = None, nt = None, leftFactor = False):
 
   if ts + len(es) == len(seq) + inseq:
     if label is None and len(es) == 1:
-#      print('Return 1:',  es[0], tokens)
       return (es[0], tokens)
     elif label is None:
-#      print('Return 2:', es, tokens)
       return (es, tokens)
     else:
-#      print('Return 3: Dict')
       return ({label:es} if len(es) > 0 else label, tokens)
   else:
-#    print('Return 4: None')
     return None
 
 
@@ -187,15 +176,13 @@ def parser(grammar, s):
   #print(tokens)
 
   r = parse(ps, tokens)
-#  print('R:', r)
   if not r is None:
     (p, t) = r
     if len(t) < 10:
       print(t)
     else:
       print(t[:10])
-#    pprint.pprint(p)
-#    print(t)
+    pprint.pprint(p)
     if len(t) == 0:
       return p
   print('Syntax error occurred, input could not be parsed.')
@@ -203,7 +190,7 @@ def parser(grammar, s):
 
 
 #######################################################
-## Interaction
+## Interactive parser
 
 def interact(u = None):
   print('Interactive parser. Submit \':q\' or \':quit\' to exit.')

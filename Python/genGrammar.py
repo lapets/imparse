@@ -12,13 +12,20 @@
 
 exec(open('imparse.py').read())
 
+reserved = '#\$\*\+\(\)\{\}\[\]\|' # Reserved characters
+comment = '#[^#]+'
+regExpr = '\$[^$]+\$'
+production = '[A-Z][A-Za-z0-9]*'
+label = '[A-Z][A-Za-z0-9]*'
+nonterminal = '`[A-Z][A-Za-z0-9]*'
+terminal = '[^A-Z' + reserved + '][^\s' + reserved + ']*'
+
 grammar = Grammar([\
   # Comments
   Production('Comment', [\
     Choices([\
       Choice('Comment', AssocNone(), [\
-#        Terminal('/*'), Many([Nonterminal('Production')]), Terminal('*/')\
-        RegExpr('/#[^#]+/'),\
+        RegExpr('/' + comment + '/'),\
         ]),\
       ]),\
     ]),\
@@ -38,7 +45,7 @@ grammar = Grammar([\
       Choice('Production', AssocNone(), [\
         #RegExpr('/[A-Z][A-Za-z0-9]*[ ]::=/'), Many([Nonterminal('Choice')]),\
         May([Nonterminal('Comment')]),\
-        RegExpr('/[A-Z][A-Za-z0-9]*/'), Terminal('::='), Many([Nonterminal('Choice')]),\
+        RegExpr('/' + production + '/'), Terminal('::='), Many([Nonterminal('Choice')]),\
         ]),\
       ])\
     ]),\
@@ -48,7 +55,7 @@ grammar = Grammar([\
     Choices([\
       Choice('Choice', AssocNone(), [\
         #May([Nonterminal('Comment')]),\
-        RegExpr('/[A-Z][A-Za-z]*/'), Terminal('|'), Many([Nonterminal('Expression')])\
+        RegExpr('/' + label + '/'), Terminal('|'), Many([Nonterminal('Expression')])\
         ]),\
       ]),\
     ]),\
@@ -74,11 +81,11 @@ grammar = Grammar([\
     Choices([\
       # Regular Expression 
       Choice('RegExpr', AssocNone(), [\
-        RegExpr('/\$[^$]+\$/'),\
+        RegExpr('/' + regExpr + '/'),\
         ]),\
       # Nonterminals
       Choice('Nonterminal', AssocNone(), [\
-        RegExpr('/`([A-Z][A-Za-z0-9]*)/'),\
+        RegExpr('/' + nonterminal + '/'),\
         ]),\
       # Empty String
       Choice('Empty String', AssocNone(), [\
@@ -86,12 +93,12 @@ grammar = Grammar([\
         ]),\
       # Terminal
       Choice('Terminal', AssocNone(), [\
-        RegExpr('/\"([#*+\$\(\)\{\}\[\]\|])\"'),\
-#        RegExpr('/\"\*\"'),\
+        RegExpr('/\"[' + reserved + ']\"'),\
         ]),\
       Choice('Terminal', AssocNone(), [\
         #RegExpr('/([^A-Z#`$*+\(\)\{\}\[\]\|][^\s#`$*+\(\)\{\}\[\]\|]*)/'),\
-        RegExpr('/([^A-Z#`*+\$\(\)\{\}\[\]\|][^\s*+]*)/'),\
+#        RegExpr('/([^A-Z#`*+\$\(\)\{\}\[\]\|][^\s*+]*)/'),\
+        RegExpr('/' + terminal + '/'),\
         ]),\
       ]),\
 

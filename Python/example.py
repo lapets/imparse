@@ -11,7 +11,7 @@ exec(open("imparse.py").read())
 
 #######################################################
 
-grammar = Grammar([\
+example = Grammar([\
    Production('formula', [\
      Choices([\
        Choice('And', AssocNone(), [Nonterminal('formula'), Terminal('and'), Nonterminal('formula')]),\
@@ -34,6 +34,6 @@ grammar = Grammar([\
  ])
 
 ## Launch interactive parser.
-interact()
+interact(example)
 
 #eof
