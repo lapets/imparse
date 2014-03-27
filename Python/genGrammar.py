@@ -67,6 +67,10 @@ grammar = Grammar([\
       Choice('May', AssocNone(), [\
         Terminal('['), Many([Nonterminal('Expression')]), Terminal(']')\
         ]),\
+      # Many
+      Choice('Many', AssocNone(), [\
+        Nonterminal('Expression'), Terminal('+')\
+        ]),\
       # MayMany
       Choice('MayMany', AssocNone(), [\
         Nonterminal('Expression'), Terminal('*'),\
@@ -74,8 +78,6 @@ grammar = Grammar([\
       Choice('MayMany', AssocNone(), [\
         Terminal('{'), Many([Nonterminal('Expression')]), Terminal('}')\
         ]),\
-      # Many
-      Choice('Many', AssocNone(), [Nonterminal('Expression'), Terminal('+')]),\
       ]),\
 
     Choices([\

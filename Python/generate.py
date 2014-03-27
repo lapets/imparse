@@ -23,8 +23,8 @@ def bnfToUxadt(bnfFile):
   r = parser(grammar, tokens)
   if r is not None:
 #    pprint.pprint(r)
-    r1 = toUxadt(r)
-    return r1
+    r = toUxadt(r)
+    return r
   return None
 
 
@@ -44,10 +44,10 @@ def bnfTokenize(bnfFile):
 
   regex = re.compile(regex)
 
-  tmp = []
+  tokens = []
   for line in bnf:
-    tmp = tmp + regex.findall(line)
-  tokens = [t for t in tmp if not (t == None or t.isspace() or t == '')]
+    tokens = tokens + regex.findall(line)
+  tokens = [t for t in tokens if not (t == None or t.isspace() or t == '')]
   bnf.close()
 #  print(tokens)
   return tokens
@@ -66,9 +66,10 @@ def toUxadt(ptree):
       (label, seq) = ('', [])
       for i in range(len(c['Choice'])):
         if i == 0:
-          label = c['Choice'][i]
-          if label == 'None':
-            label = None
+          label = None if c['Choice'][0] == 'None' else c['Choice'][0]
+#          label = c['Choice'][0]
+#          if label == 'None':
+#            label = None
         else:
           es = c['Choice'][i]
           r = toUxadtExpr(es)
@@ -97,13 +98,13 @@ def toUxadtExpr(es):
     if len(x) == 3 and x[0] == '\"' and x[-1] == '\"':
       x = x[1]
     cs = cs + [Terminal(x)]
-  elif ty == 'Nonterminal':
-    cs = cs + [Nonterminal(x[1:])]
   elif ty == 'Empty String':
     cs = cs + [Terminal('\"\"')]
+  elif ty == 'Nonterminal':
+    cs = cs + [Nonterminal(x[1:])]
   elif ty == 'RegExpr':
-    s = '/' + x[1:-1] + '/'
-    cs = cs + [RegExpr(s)]
+    x = '/' + x[1:-1] + '/'
+    cs = cs + [RegExpr(x)]
   # One/May/Many/MayMany
   elif ty == 'One':
     cs = cs + [One(toUxadtExpr(x))]
@@ -149,9 +150,9 @@ def writeUxadt(u, name = 'gen', indent = 2):
   f.write(s)
   f.close()
 
-def uxadtToStr(g, indent = 2):
+def uxadtToStr(u, indent = 2):
   indent = ' ' * indent
-  ps = g.match(Grammar(_), lambda ps: ps).end
+  ps = u.match(Grammar(_), lambda ps: ps).end
   st = 'Grammar([\\'
   for p in ps:
     (nt, cbs) = p.match(Production(_, _), lambda nt, cbs: (nt, cbs)).end
@@ -165,30 +166,30 @@ def uxadtToStr(g, indent = 2):
           st = st + '\n' + (indent * 3) + 'Choice(None, AssocNone(), [\\'
         else:
           st = st + '\n' + (indent * 3) + 'Choice(\'' + label + '\', AssocNone(), [\\'
-        r = uxadtExprToStr(seq)
-        st = st + '\n' + (indent * 4) + r + '\\\n' + (indent * 4) +']),\\'
+        r = uxadtSeqToStr(seq)
+        st = st + '\n' + (indent * 4) + r + '\\\n' + (indent * 4) + ']),\\'
       st = st + '\n' + (indent * 3) + ']),\\'
     st = st + '\n' + (indent * 2) + ']),\\'
   st = st + '\n'+ indent + '])'
   return st
 
-def uxadtExprToStr(seq):
+def uxadtSeqToStr(seq):
   s = ''
   for x in seq:
     et = etype(x)
     (ty, expr) = et
  
     if ty == 'One':
-      r = uxadtExprToStr(expr)
+      r = uxadtSeqToStr(expr)
       s = s + 'One([' + r + ']), '
     elif ty == 'May':
-      r = uxadtExprToStr(expr)
+      r = uxadtSeqToStr(expr)
       s = s + 'May([' + r + ']), '
     elif ty == 'Many':
-      r = uxadtExprToStr(expr)
+      r = uxadtSeqToStr(expr)
       s = s + 'Many([' + r + ']), '
     elif ty == 'MayMany':
-      r = uxadtExprToStr(expr)
+      r = uxadtSeqToStr(expr)
       s = s + 'MayMany([' + r + ']), '
     elif ty == 'Terminal':
       s = s + 'Terminal(\'' + expr + '\'), '
