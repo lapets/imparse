@@ -19,7 +19,7 @@
 
 class Value():
   def __init__(self, entries): 
-  self.__dict__.update(entries)
+    self.__dict__.update(entries)
 
   # Structural equality.
   def equal(self, other):
@@ -51,11 +51,11 @@ class Matching():
   candidate = None
   end = None
 
- def __init__(self, candidate, end):
-   if end is None:
-     self.candidate = candidate
-   else:
-     self.end = end
+  def __init__(self, candidate, end):
+    if end is None:
+      self.candidate = candidate
+    else:
+      self.end = end
 
   # Matching function.
   def match(self, p, f):
