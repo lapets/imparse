@@ -9,13 +9,51 @@
 ##
 ##
 
-
 import re
 import pprint
 import uxadt as U
+_ = U._
 
-exec(open('uxadt.py').read())
-exec(open('definitions.py').read())
+####################################################################
+## Data type definitions.
+
+eval(U.definition({ 'Grammar': [_]}))
+
+## Under grammar.
+eval(U.definition({\
+  'Normal': [],\
+  'IndentPresentation': [],\
+  'IndentRequired': []\
+  }))
+
+eval(U.definition({ 'Production': [_, _] }))
+eval(U.definition({ 'Choices': [_] }))
+eval(U.definition({ 'Choice': [_, _, _] }))
+
+eval(U.definition({\
+  'Just': [_],\
+  'Nothing': []\
+   }))
+
+eval(U.definition({\
+  'AssocNone': [],\
+  'AssocLeft': [],\
+  'AssocRight': [],\
+  'AssocFlat': []\
+  }))
+
+eval(U.definition({\
+  'One': [_],\
+  'May': [_],\
+  'Many': [_],\
+  'MayMany': [_]\
+  }))
+
+eval(U.definition({\
+  'Nonterminal': [_],\
+  'RegExpr': [_],\
+  'Terminal': [_]\
+  }))
 
 '''
 ####################################################################
@@ -238,4 +276,4 @@ def etype(e):
     .end
 
 
-#eof
+##eof

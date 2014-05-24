@@ -1,4 +1,4 @@
-#######################################################
+####################################################################
 ##
 ## Generate.py
 ##
@@ -9,14 +9,15 @@
 ##    Version: 0.0.0.4
 ##
 ##
-#######################################################
 
 exec(open('imparse.py').read())
 exec(open('genGrammar.py').read())
 
-#######################################################
+## RELEASE CONTENT BEGINS HERE #####################################
+
+####################################################################
 # Reads a .txt file with a grammar conforming to BNF notation
-# and transforms it to UxADT
+# and transforms it to UxADT.
 
 def bnfToUxadt(bnfFile):
   tokens = bnfTokenize(bnfFile)
@@ -131,8 +132,9 @@ def toUxadtExpr(es):
   return cs
 
 
-#######################################
-# Writes a UxADT grammar to a file
+#######################################################
+# Writes a UxADT grammar to a file.
+
 def writeUxadt(u, name = 'gen', indent = 2):
   s = uxadtToStr(u, indent)
   f = open(name + '.py', 'w')

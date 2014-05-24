@@ -12,6 +12,7 @@
 ##
 ##
 
+from types import ModuleType
 
 #####################################################################
 ## Representation for individual algebraic data type values and
@@ -37,17 +38,17 @@ class Value():
   # Matching function.
   def match(self, p, f):
     subst = uxadt.unify(p, self)
-    return Matching(self, None if subst is None else f(*subst))
+    return _Matching(self, None if subst is None else f(*subst))
 
   # Matching function (concise synonym).
   def _(self, p, f):
     subst = uxadt.unify(p, self)
-    return Matching(self, None if subst is None else f(*subst))
+    return _Matching(self, None if subst is None else f(*subst))
 
 #####################################################################
 ## Representation for state of matching computations.
 
-class Matching():
+class _Matching():
   candidate = None
   end = None
 
@@ -59,11 +60,11 @@ class Matching():
 
   # Matching function.
   def match(self, p, f):
-    return Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
+    return _Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
 
   # Matching function (concise synonym).
   def _(self, p, f):
-    return Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
+    return _Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
 
 #####################################################################
 ## Container class for library.
@@ -95,22 +96,38 @@ class uxadt():
   @staticmethod
   def definition(sigs):
     # Since emitted code will refer to uxadt operations
-  	# by name, the object must be defined in the scope.
-    if not 'uxadt' in globals():
-      raise NameError('UxADT error: identifier uxadt must be defined.')
+    # by name, the module must be defined in the scope.
+    # Find the module name and return the code to evaluate.
+    import inspect
+    frame = inspect.currentframe()
+    for name in frame.f_back.f_locals:
+      try:
+        if type(frame.f_back.f_locals[name]) == ModuleType and frame.f_back.f_locals[name].Value == Value:
+          stmts = []
+          stmts += [con + " = lambda *args, **kwargs: "+name+".Value({'" + con + "': args})" for con in sigs]
+          stmts = ['exec("' + s + '")' for s in stmts]
+          return '(' + ",".join(stmts) + ')'
+      except: pass
+    raise NameError('UxADT error: module cannot be found in global scope. '+\
+                    'Please ensure that the module is being loaded correctly.')
 
-    stmts = []
-    stmts += [con + " = lambda *args, **kwargs: Value({'" + con + "': args})" for con in sigs]
-    stmts = ['exec("' + s + '")' for s in stmts]
-    return '(' + ",".join(stmts) + ')'
 
 #####################################################################
 ## Useful global synonyms.
 
-try:
-  _
+try:    _
 except:
   _ = uxadt._
+  import inspect
+  frame = inspect.currentframe()
+  frame.f_globals['_'] = _
+  
+
+try:    definition
+except: definition = uxadt.definition
+
+try:    define
+except: define = uxadt.definition
 
 #####################################################################
 ## Examples.
