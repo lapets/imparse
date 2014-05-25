@@ -17,39 +17,39 @@ _ = U._
 ####################################################################
 ## Data type definitions.
 
-eval(U.definition({ 'Grammar': [_]}))
+eval(U.define({ 'Grammar': [_]}))
 
 ## Under grammar.
-eval(U.definition({\
+eval(U.define({\
   'Normal': [],\
   'IndentPresentation': [],\
   'IndentRequired': []\
   }))
 
-eval(U.definition({ 'Production': [_, _] }))
-eval(U.definition({ 'Choices': [_] }))
-eval(U.definition({ 'Choice': [_, _, _] }))
+eval(U.define({ 'Production': [_, _] }))
+eval(U.define({ 'Choices': [_] }))
+eval(U.define({ 'Choice': [_, _, _] }))
 
-eval(U.definition({\
+eval(U.define({\
   'Just': [_],\
   'Nothing': []\
    }))
 
-eval(U.definition({\
+eval(U.define({\
   'AssocNone': [],\
   'AssocLeft': [],\
   'AssocRight': [],\
   'AssocFlat': []\
   }))
 
-eval(U.definition({\
+eval(U.define({\
   'One': [_],\
   'May': [_],\
   'Many': [_],\
   'MayMany': [_]\
   }))
 
-eval(U.definition({\
+eval(U.define({\
   'Nonterminal': [_],\
   'RegExpr': [_],\
   'Terminal': [_]\
@@ -80,13 +80,14 @@ def tokenize(ps, s):
 def tok(seq):
   terminals = []
   for x in seq:
-    (ty, e) = etype(x)
-    if ty == 'Terminal':
+    if x < Terminal(_):
+      (e,) = x
       t = re.escape(e)
 #      t = re.escape(x.match(Terminal(_), lambda t: t).end)
       if t not in terminals:
         terminals = terminals + [t]
-    elif ty in ['May', 'Many', 'MayMany']:
+    elif x < May(_) or x < Many(_) or x < MayMany(_):
+      (e,) = x
       r = tok(e)
       if len(r) > 0:
         terminals = terminals + [t for t in r not in terminals]
@@ -125,9 +126,8 @@ def parseSeq(ps, tokens, seq, label = None, nt = None, leftFactor = False):
   (ts, es) = (0, [])
   inseq = 0
   for x in seq:
-    (ety, expr) = etype(x)
-
-    if ety == 'One':
+    if x < One(_):
+      (expr,) = x
       seq2 = expr
       for s in seq2:
         r = parseSeq(ps, tokens, s)
@@ -141,8 +141,9 @@ def parseSeq(ps, tokens, seq, label = None, nt = None, leftFactor = False):
             break
       if r is None: break
 
-    elif ety in ['May', 'Many', 'MayMany']:
-      may = True if ety == 'May' or ety == 'MayMany' else False
+    elif x < May(_) or x < Many(_) or x < MayMany(_):
+      (expr,) = x
+      may = x < May(_) or x < MayMany(_)
       seq2 = expr
       r = parseSeq(ps, tokens, seq2)
       if r is not None:
@@ -155,7 +156,7 @@ def parseSeq(ps, tokens, seq, label = None, nt = None, leftFactor = False):
         if may == True:
           ts = ts + 1
         else: break
-      if ety == 'Many' or ety == 'MayMany':
+      if x < Many(_) or x < MayMany(_):
         while r is not None and len(tokens) > 0:
           r = parseSeq(ps, tokens, seq2)
           if r is not None:
@@ -168,14 +169,16 @@ def parseSeq(ps, tokens, seq, label = None, nt = None, leftFactor = False):
               inseq = inseq + 1
 
     # Terminal
-    elif ety == 'Terminal':
+    elif x < Terminal(_):
+      (expr,) = x
       if len(tokens) > 0 and tokens[0] == expr:
         tokens = tokens[1:]
         ts = ts + 1
       else: break
 
     # Regular expression
-    elif ety == 'RegExpr':
+    elif x < RegExpr(_):
+      (expr,) = x
       if expr[0] == '/' and expr[-1] == '/':
         if len(tokens) > 0 and re.compile(expr[1:-1]).match(tokens[0]):
           es = es + [tokens[0]]
@@ -183,7 +186,8 @@ def parseSeq(ps, tokens, seq, label = None, nt = None, leftFactor = False):
         else: break
 
     # Nonterminal
-    elif ety == 'Nonterminal':
+    elif  x < Nonterminal(_):
+      (expr,) = x
       if ts + len(es) == 0:
         if expr == nt and leftFactor: # Top nonterminal
           break
@@ -259,21 +263,5 @@ def interact(u = None):
     else:
       print('Unknown input.')
     print()
-
-
-####################################################################
-## Useful helper function.
-
-def etype(e):
-  return e\
-    .match(Terminal(_), lambda t: ('Terminal', t))\
-    .match(RegExpr(_), lambda r: ('RegExpr', r))\
-    .match(Nonterminal(_), lambda nt: ('Nonterminal', nt))\
-    .match(One(_), lambda seq: ('One', seq))\
-    .match(May(_), lambda seq: ('May', seq))\
-    .match(Many(_), lambda seq: ('Many', seq))\
-    .match(MayMany(_), lambda seq: ('MayMany', seq))\
-    .end
-
 
 ##eof

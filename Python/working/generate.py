@@ -177,27 +177,31 @@ def uxadtToStr(u, indent = 2):
 
 def uxadtSeqToStr(seq):
   s = ''
-  for x in seq:
-    et = etype(x)
-    (ty, expr) = et
- 
-    if ty == 'One':
+  for x in seq: 
+    if x < One(_):
+      (expr,) = x
       r = uxadtSeqToStr(expr)
       s = s + 'One([' + r + ']), '
-    elif ty == 'May':
+    elif x < May(_):
+      (expr,) = x
       r = uxadtSeqToStr(expr)
       s = s + 'May([' + r + ']), '
-    elif ty == 'Many':
+    elif x < Many(_):
+      (expr,) = x
       r = uxadtSeqToStr(expr)
       s = s + 'Many([' + r + ']), '
-    elif ty == 'MayMany':
+    elif x < MayMany(_):
+      (expr,) = x
       r = uxadtSeqToStr(expr)
       s = s + 'MayMany([' + r + ']), '
-    elif ty == 'Terminal':
+    elif x < Terminal(_):
+      (expr,) = x
       s = s + 'Terminal(\'' + expr + '\'), '
-    elif ty == 'RegExpr':
+    elif x < RegExpr(_):
+      (expr,) = x
       s = s + 'RegExpr(\'' + expr + '\'), '
-    elif ty == 'Nonterminal':
+    elif x < Nonterminal(_):
+      (expr,) = x
       s = s + 'Nonterminal(\'' + expr + '\'), '
   return s
   

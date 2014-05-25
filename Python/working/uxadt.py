@@ -24,6 +24,8 @@ class Value():
 
   # Structural equality.
   def equal(self, other):
+    if hasattr(self, '__last__'): delattr(self, '__last__')
+    if hasattr(other, '__last__'): delattr(other, '__last__')
     for c in self.__dict__:
       for d in other.__dict__:
         if c == d and len(self.__dict__[c]) == len(other.__dict__[d]):
@@ -37,13 +39,29 @@ class Value():
 
   # Matching function.
   def match(self, p, f):
+    if hasattr(self, '__last__'): delattr(self, '__last__')
+    if hasattr(p, '__last__'): delattr(p, '__last__')
     subst = uxadt.unify(p, self)
-    return _Matching(self, None if subst is None else f(*subst))
+    return _Matching(self, None if subst is None else f(*[v for (x,v) in subst]))
 
   # Matching function (concise synonym).
   def _(self, p, f):
-    subst = uxadt.unify(p, self)
-    return _Matching(self, None if subst is None else f(*subst))
+    return match(self, p, f)
+
+  # Convenient, stateful alternative for Python
+  # "if" statement blocks.
+  def __lt__(v, p):
+    subst = uxadt.unify(p, v)
+    if subst != None:
+      v.__last__ = [v for (x,v) in subst]
+    return subst != None
+
+  def __iter__(self):
+    if hasattr(self, '__last__'):
+      tmp = self.__last__
+      delattr(self, '__last__')
+      return iter(tmp)
+    raise NameError('UxADT error: can only traverse result of match exactly once.')
 
 #####################################################################
 ## Representation for state of matching computations.
@@ -76,8 +94,11 @@ class uxadt():
   # Pattern matching unification algorithm.
   @staticmethod
   def unify(p, v):
+    if type(p) == str:
+       return [(p, v)]
+
     if not isinstance(p, Value):
-       return [v]
+       return [(None, v)]
 
     for c in p.__dict__:
       for d in v.__dict__:
@@ -122,7 +143,6 @@ except:
   frame = inspect.currentframe()
   frame.f_globals['_'] = _
   
-
 try:    definition
 except: definition = uxadt.definition
 
