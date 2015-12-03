@@ -7,6 +7,6 @@ setup(
     license          = 'GNU-GPL',
 	url              = 'http://imparse.org',
 	author           = 'A. Lapets',
-	author_email     = 'lapets@bu.edu',
+	author_email     = 'a@lapets.io',
     long_description = open('README.txt').read(),
 )
