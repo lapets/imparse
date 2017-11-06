@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/vs.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
     <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="js/lib/imparse.js"></script>
     <style>
       html, body { height:100%; margin:0; color:#000000; font-family:'Open Sans',sans-serif; }
       body #content { z-index:100; min-height:100%; width:900px; margin:0 auto -90px; }
@@ -44,8 +46,8 @@
       newLink.type = 'image/x-icon';
       newLink.href = 'data:image/png;base64,'+favIcon;
       docHead.appendChild(newLink);
+      hljs.initHighlightingOnLoad();
     </script>
-    <script src="js/lib/imparse.js"></script>
     <script>
       function demo(graText, strText, astDiv) {
         var grammar = JSON.parse(document.getElementById(graText).value);
@@ -57,7 +59,7 @@
     <script src="https://cdn.jsdelivr.net/npm/json-stringify-pretty-compact@1.0.4/index.min.js"></script>
     <base target="_parent">
   </head>
-  <body>
+  <body onload="$('code').each(function(){ $(this).html(($(this).html().trim()));});">
     <div id="content">
       <div id="title"><span>im</span>parse</div>
       <div id="description">
