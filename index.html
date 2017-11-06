@@ -41,6 +41,8 @@
       newLink.href = 'data:image/png;base64,'+favIcon;
       docHead.appendChild(newLink);
     </script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/styles/vs.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
     <script src="js/lib/imparse.js"></script>
     <script>
       function demo(graText, strText, astDiv) {
@@ -62,6 +64,12 @@
       <div id="sheet">
         <div class="section"><h2>Purpose</h2>
           This library makes it possible to rapidly assemble and deploy a parser for a simple language. It is intended primarily for languages that have an <a href="https://en.wikipedia.org/wiki/LL_grammar">LL grammar</a>.
+        </div>
+        <div class="section"><h2>Usage</h2>
+          The library can be included in the usual way:
+          <pre><code class="html">
+&lt;script src="http://imparse.org/js/lib/imparse.js">&lt;/script&gt;
+          </code></pre>
         </div>
         <div class="section">
           <h2>Examples</h2>
