@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="all" name="robots" />
+    <title>imparse</title>
+    <link rel="shortcut icon" type="image/x-icon" href="data:image/x-icon;base64,iVBORw0KGgo="><!-- Suppress browser favicon.ico request. -->
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans">
+    <style>
+      html, body { height:100%; margin:0; color:#000000; font-family:'Open Sans',sans-serif; }
+      body #content { z-index:100; min-height:100%; width:900px; margin:0 auto -90px; }
+      body #content #title { margin-bottom:8px; padding-top:50px; /*text-align:center;*/ color:#AFAFAF; font-family:'Open Sans',sans-serif; font-size:48px; }
+      body #content #title > span { color:firebrick; }
+      body #content #description { padding-bottom:40px; font-size:16px; }
+      body #content #sheet { margin:0 auto; padding-bottom:40px; color:#000000; background-color:white; }
+      body #content #sheet .section { padding-top:20px; font-family:'Open Sans',sans-serif; font-size:16px; }
+      body #content #sheet .section h2 { color:#888888; font-family:'Open Sans',sans-serif; font-weight:normal; font-size:28px; }
+      body #content #sheet .section ul { list-style:none; padding:8px 0px 8px 0px; margin:0; }
+      body #content #sheet .section li { padding-left:1.5em; text-indent:-1em; }
+      body #content #sheet .section li:before { content:"4"; color:#888888; font-family:'Webdings'; }
+      body #content #sheet .section a { color:firebrick; text-decoration:none; }
+      body #content #sheet .section a:hover { text-decoration:underline; }
+      body #content #footer_spacer { height:70px; }
+      body #footer { width:900px; height:70px; margin:0 auto; padding-top:15px; font-family:'Open Sans',sans-serif; font-size:13px; }
+      body #footer hr { border:0px; border-top:1px solid #DFDFDF; }
+      body #footer a { color:#000000; text-decoration:none; }
+      body #footer a:hover { text-decoration:underline; }
+    </style>
+    <script>
+      var favIcon = "R0lGODlhIAAgANUAALQeFPjp6e3Jx+Suq8VQSL04L2VlZf39/WhoaPns69ra2oODg/7+/sHBwaioqLa2tsfHx8LCwsjIyOSsqb+/v9PT06Ojo8ZTTO3Hxenp6bszKr46Mrm5ubOzs9fX139/f+SvrLS0tPrv7v35+MXFxfDw8L6+vtbW1vfo5/rx8P79/fjr6snJydzc3O7u7sNLRLe3t/77+ri4uOXl5YWFhWpqan5+frUhF4aGhuLi4qmpqWNjY7MaEP///wAAAAAAACH5BAAAAAAALAAAAAAgACAAAAbBwJ5wSCwaj8ikcslsOp/QqHRKrVqv2KyWWEMgcIdexIuQ9VIvgnrNvhwNu90i3IjvHr0Eb8/v799xcz11cXh6fn4AR3YfYRR2IT0riIhHOg4OHAw9LZgWJz0jEwOkpaYgUJtbWgqtOZslrR4uPTEYAri5ugJHCAYGNGERvwYweQDIycoAN4BydHaGlH2KRnDPg9F5032LcTZhJnYdPSIaBejp6htHLBIQFZsZ7yQzPSooAfr7/AGr/wADChxIsCCSIAA7";
+      var docHead = document.getElementsByTagName('head')[0];
+      var newLink = document.createElement('link');
+      newLink.rel = 'shortcut icon';
+      newLink.type = 'image/x-icon';
+      newLink.href = 'data:image/png;base64,'+favIcon;
+      docHead.appendChild(newLink);
+    </script>
+    <base target="_parent">
+  </head>
+  <body>
+    <div id="content">
+      <div id="title"><span>im</span>parse</div>
+      <div id="description">
+        Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.
+      </div>
+      <div id="sheet">
+        <div class="section">
+          <h2>Repository</h2>
+          The <a href="http://github.com/lapets/imparse">source code repository</a> is maintained on GitHub.
+        </div>
+      </div><!-- /#sheet -->
+      <div id="footer_spacer"></div>
+    </div><!-- /#content -->
+    <div id="footer">
+      <hr/>
+      <a href="http://www.github.com/lapets/imparse">Repository</a>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="mailto:a@lapets.io">Contact</a>
+    </div><!-- /#footer -->
+  </body>
+</html>
