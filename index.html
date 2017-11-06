@@ -17,6 +17,8 @@
       body #content #sheet .section { padding-top:20px; font-family:'Open Sans',sans-serif; font-size:16px; }
       body #content #sheet .section h2 { font-family:'Open Sans',sans-serif; font-weight:normal; font-size:28px; color:#888888; }
       body #content #sheet .section h3 { font-weight:normal; color:#666666; }
+      body #content #sheet .section > pre > code { padding:10px; font-size:14px; }
+      body #content #sheet .section > pre > code { background-color:#F1F1F1; }
       body #content #sheet .section table { width:100%; font-size:12px; }
       body #content #sheet .section table div { width:100%; border:1px solid #888888; padding:5px; font-family:Monospace; font-size:11px; }
       body #content #sheet .section table div pre { margin:0; padding:0; }
@@ -62,10 +64,12 @@
         Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.
       </div>
       <div id="sheet">
-        <div class="section"><h2>Purpose</h2>
+        <div class="section">
+          <h2>Purpose</h2>
           This library makes it possible to rapidly assemble and deploy a parser for a simple language. It is intended primarily for languages that have an <a href="https://en.wikipedia.org/wiki/LL_grammar">LL grammar</a>.
         </div>
-        <div class="section"><h2>Usage</h2>
+        <div class="section">
+          <h2>Usage</h2>
           The library can be included in the usual way:
           <pre><code class="html">
 &lt;script src="http://imparse.org/js/lib/imparse.js">&lt;/script&gt;
