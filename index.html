@@ -72,10 +72,11 @@
         </div>
         <div class="section">
           <h2>Usage</h2>
-          The library can be included in the usual way:
+          The library can be included in a webpage in the usual way:
           <pre><code class="html">
 &lt;script src="http://imparse.org/js/lib/imparse.js">&lt;/script&gt;
           </code></pre>
+          The above introduces the <code>imparse</code> object into scope. To obtain a JSON representation of an abstract syntax tree given a grammar definition <code>grammar</code> (in JSON format) and a concrete syntax string <code>str</code>, it is sufficient to call <code>imparse.parse(grammar, str)</code>.
         </div>
         <div class="section">
           <h2>Examples</h2>
