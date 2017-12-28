@@ -1,15 +1,22 @@
-/* ****************************************************************************
-** 
-** imparse.js
-** http://imparse.org
-**
-** Lightweight infinite-lookahead parser generator that supports basic grammars
-** defined in a JSON format.
-**
-*/
+/**
+ * imparse.js
+ * http://imparse.org
+ *
+ * Lightweight infinite-lookahead parser generator that supports basic grammars
+ * defined in a JSON format.
+ *
+ * @namespace imparse
+ */
 
 (function (imparse) {
 
+  /**
+   * Tokenize a string according to a grammer.
+   * @memberof imparse
+   * @param {Object} grammar - a grammar represented as an object.
+   * @param {string} s - the string to tokenize.
+   * @return {string[]} the array of tokens obtained from the input string.
+   */
   imparse.tokenize = function (grammar, s) {
     // Extract terminals from grammar.
     var terminals = [];
@@ -62,6 +69,12 @@
     return tokens;
   };
 
+  /**
+   * Show a token sequence as a string.
+   * @memberof imparse
+   * @param {string[]} ts - an array representing a token sequence.
+   * @return {string} a string representation of the token sequence.
+   */
   imparse.show_tokens = function (ts) {
     var s = "", row = 0, col = 0;
     for (var i = 0; i < ts.length; i++) {
@@ -73,6 +86,14 @@
     return s;
   };
 
+  /**
+   * Parse a token sequence into an AST according to grammar.
+   * @memberof imparse
+   * @param {Object} grammar - a grammar represented as an object.
+   * @param {string[]} ts_original - an array representing a token sequence.
+   * @param {string} nonterm - root production rule's non-terminal.
+   * @return {Object} an abstract syntax tree (AST) of nested objects.
+   */
   imparse.parse_tokens = function (grammar, ts_original, nonterm) {
     // Find the appropriate produciton.
     for (var i = 0; i < grammar.length; i++) {
@@ -134,6 +155,14 @@
     } // for each production in grammar
   };
 
+  /**
+   * Tokenize and parse a string into an AST according to a grammar.
+   * @memberof imparse
+   * @param {Object} grammar - a grammar represented as an object.
+   * @param {string} s - a string to tokenize and parse.
+   * @param {string} nonterm - root production rule's non-terminal.
+   * @return {Object} an abstract syntax tree (AST) of nested objects.
+   */
   imparse.parse = function (grammar, s) {
     if (grammar.length > 0) {
       for (var nonterm in grammar[0]) {
