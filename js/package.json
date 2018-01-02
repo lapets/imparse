@@ -24,6 +24,10 @@
     { 
       "name" : "Weston Vial",
       "email" : "wevial@bu.edu"
+    },
+    { 
+      "name" : "Vidhu Nath",
+      "email" : "vnath@bu.edu"
     }
   ],
   "license": "MIT",
