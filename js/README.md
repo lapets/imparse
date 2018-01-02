@@ -27,9 +27,12 @@ var grammar = [
 ```
 
 It is assumed that grammars are represented as nested objects according to the following conventions:
-* a grammar consists of an array of production rules;
-* each production rule is represented by an object that maps the name of its non-terminal to an array of possible cases; and
-* each case is represented by an object that maps a case name to a sequence of terminals and non-terminals.
+
+* a *grammar* consists of an array of production rules;
+* each *production rule* is represented by an object that maps the name of its non-terminal to an array of possible cases;
+* each *case* is represented by an object that maps a case name to a sequence of terminals and non-terminals; and
+* each *entry* in a case sequence can be a terminal (represented as a string), non-terminal (represented by a singleton array with a non-terminal string), or regular expression (represented as an object with a single key `"RegExp"` that maps to the actual regular expression string).
+
 Note that the case name is used within the abstract syntax tree constructed according to that case.
 
 It is possible to parse a string according to the grammar in the following way:
