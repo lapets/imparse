@@ -8,6 +8,8 @@ This library makes it possible to rapidly assemble and deploy a parser for a sim
 
 ## Usage
 
+### Representation of Grammars
+
 Suppose we want to represent a grammar of basic arithmetic expressions in the following way (assuming that operators will associate to the right):
 ```javascript
 var grammar = [ 
@@ -33,9 +35,11 @@ It is assumed that grammars are represented as nested objects according to the f
 
 Note that the *case name* (i.e., the sole key in each case object) is used within any abstract syntax tree node constructed according to that case. For example, if a token sequence or string is parsed successfully according to the case sequence `{"Add": [["Factor"], "+", ["Term"]]}`, then the resulting abstract syntax tree will be of the form `{"Add":[...]}`.
 
+### Basic Parsing
+
 It is possible to parse a string according to the grammar in the following way:
 ```javascript
-imparse.parse(graArith, '1*2 + 3*4')
+imparse.parse(grammar, '1*2 + 3*4')
 ```
 The above yields the following abstract syntax tree:
 ```javascript
