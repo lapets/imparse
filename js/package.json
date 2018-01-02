@@ -1,10 +1,6 @@
 {
   "name": "imparse",
-  "version": "0.0.2",
-  "author": {
-    "name": "Andrei Lapets",
-    "email": "a@lapets.io"
-  },
+  "version": "0.0.3",
   "description": "Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.",
   "homepage": "http://imparse.org",
   "repository": {
@@ -17,12 +13,27 @@
   "keywords": [
     "parse",
     "parser",
+    "parsers",
     "parsing"
+  ],
+  "author": {
+    "name": "Andrei Lapets",
+    "email": "a@lapets.io"
+  },
+  "contributors": [
+    { 
+      "name" : "Weston Vial",
+      "email" : "wevial@bu.edu"
+    }
   ],
   "license": "MIT",
   "readmeFilename": "README.md",
   "main": "lib/imparse.js",
-  "dependencies": {},
-  "analyze": false,
-  "preferGlobal": false
+  "dependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1"
+  },
+  "scripts": {
+    "test": "mocha test"
+  }
 }
