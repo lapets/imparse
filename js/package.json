@@ -1,6 +1,6 @@
 {
   "name": "imparse",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.",
   "homepage": "http://imparse.org",
   "repository": {
@@ -32,7 +32,7 @@
   ],
   "license": "MIT",
   "readmeFilename": "README.md",
-  "main": "lib/imparse.js",
+  "main": "src/imparse.js",
   "dependencies": {
     "chai": "^4.1.2",
     "mocha": "^4.0.1"
