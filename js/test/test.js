@@ -1,6 +1,6 @@
 var assert = require('assert');
 var expect = require('chai').expect;
-var imparse = require('../lib/imparse');
+var imparse = require('../src/imparse');
 
 describe('imparse', function() {
 
