@@ -98,12 +98,14 @@
     // Find the appropriate produciton.
     for (var i = 0; i < grammar.length; i++) {
       if (nonterm in grammar[i]) {
+        var longest = null, length = 0;
+
         // For each option in the production.
         for (var j = 0; j < grammar[i][nonterm].length; j++) {
           var ts = ts_original, seq = grammar[i][nonterm][j];
           for (var con in seq) { // Unwrap singleton JSON object.
             var success = true, subtrees = [];
-            for (var k = 0; k < seq[con].length; k++) {
+            for (var k = 0; k < seq[con].length; k++) { // Iterate over sequence entries.
               if (ts.length == 0) { // This option failed, but others may succeed.
                 success = false;
                 break;
@@ -116,7 +118,7 @@
                   subtrees.push(result[0]);
                   ts = result[1];
                 } else {
-                  return result;
+                  break; // This sequence did not succeed.
                 }
               } else if (entry instanceof Object && 'RegExp' in entry) {
                 var c = ts[0].str.match(new RegExp('^' + entry['RegExp']));
@@ -138,19 +140,29 @@
             } // for each entry in the sequence
 
             if (success) {
-              if (con.length > 0) { 
-                var o = {};
-                o[con] = subtrees
-                return [o, ts];
+              if (con.length > 0) {
+                if (ts_original.length - ts.length > length) {
+                  var o = {};
+                  o[con] = subtrees
+                  longest = [o, ts];
+                  length = ts_original.length - ts.length;
+                }
               } else { // Pass-through option with only one subtree.
                 if (subtrees.length != 1)
-                  return {'Error': 'Improperly defined production rule.'};
-                return [subtrees[0], ts];
+                  return {"Error": "Pass-through case sequence should only have one sequence entry."};
+
+                if (ts_original.length - ts.length > length) {
+                  longest = [subtrees[0], ts];
+                  length = ts_original.length - ts.length;
+                }
               }
             } // if tokens parsed with option sequence successfully
 
           } // unwrap JSON object for constructor and sequence
         } // for each possible sequence under the non-terminal
+
+        return longest; // First result that consumed as many tokens as any other.
+
       } // if production is the one specified by argument
     } // for each production in grammar
   };
