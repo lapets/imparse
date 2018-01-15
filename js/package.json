@@ -1,6 +1,6 @@
 {
   "name": "imparse",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.",
   "homepage": "http://imparse.org",
   "repository": {
