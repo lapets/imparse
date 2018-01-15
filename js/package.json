@@ -32,7 +32,7 @@
   ],
   "license": "MIT",
   "readmeFilename": "README.md",
-  "main": "src/imparse.js",
+  "main": "lib/imparse.js",
   "dependencies": {
     "chai": "^4.1.2",
     "mocha": "^4.0.1"
