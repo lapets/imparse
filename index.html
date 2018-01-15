@@ -52,8 +52,15 @@
       function demo(graText, strText, astDiv) {
         var grammar = JSON.parse(document.getElementById(graText).value);
         var str = document.getElementById(strText).value;
-        var ast = imparse.parse(grammar, str);
-        document.getElementById(astDiv).innerHTML = stringify(ast, {maxLength:120}).trim();
+        if (str.length == 0) {
+          document.getElementById(astDiv).innerHTML = "No input provided.";
+        } else {
+          var ast = imparse.parse(grammar, str);
+          if (ast == null)
+            document.getElementById(astDiv).innerHTML = "Parsing did not succeed.";
+          else
+            document.getElementById(astDiv).innerHTML = stringify(ast, {maxLength:120}).trim();
+        }
       }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/json-stringify-pretty-compact@1.0.4/index.min.js"></script>
