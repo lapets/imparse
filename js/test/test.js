@@ -54,13 +54,26 @@ describe('imparse', function() {
       assert.equal(JSON.stringify(imparse.parse(graBacktrackRecursion, 'beta beta end')), '{"Two":[{"Beta":[]},{"Beta":[]}]}');
     });
 
+    var graBacktrackRecursionPassThrough = [
+      {"Alpha": [
+        {"": [["Beta"]]},
+        {"Two": ["two"]}
+      ]},
+      {"Beta": [
+        {"One": ["one"]}
+      ]}
+    ];
+    it('backtrack-recursion-pass-through', function() {
+      assert.equal(JSON.stringify(imparse.parse(graBacktrackRecursionPassThrough, 'one')), '{"One":[]}');
+      assert.equal(JSON.stringify(imparse.parse(graBacktrackRecursionPassThrough, 'two')), '{"Two":[]}');
+    });
+
     var graArith = [
       {"Term": [
         {"Add": [["Factor"], "+", ["Term"]]},
         {"": [["Factor"]]}
       ]},
       {"Factor": [
-        {"Mul": [["Atom"], "*", ["Factor"]]},
         {"Mul": [["Atom"], "*", ["Factor"]]},
         {"": [["Atom"]]}
       ]},
@@ -81,25 +94,36 @@ describe('imparse', function() {
       {"Term": [
         {"Add": [["Factor"], "+", ["Term"]]},
         {"Sub": [["Factor"], "-", ["Term"]]},
-        {"": ["(", ["Term"], ")"]},
         {"": [["Factor"]]}
       ]},
       {"Factor": [
         {"Mul": [["Atom"], "*", ["Factor"]]},
-        {"": ["(", ["Factor"], ")"]},
         {"": [["Atom"]]}
       ]},
       {"Atom": [
+        {"": ["(", ["Term"], ")"]},
         {"Num": [{"RegExp":"[0-9]+"}]},
         {"Var": [{"RegExp":"[a-z]"}]}
       ]}
     ];
     it('polynomials', function() {
-      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1+2')), 
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1+2')),
         '{"Add":[{"Num":["1"]},{"Num":["2"]}]}');
-      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1+2+3')), 
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1+2+3')),
         '{"Add":[{"Num":["1"]},{"Add":[{"Num":["2"]},{"Num":["3"]}]}]}');
-      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1*2 + 3*4')), 
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(1+2)+3')),
+        '{"Add":[{"Add":[{"Num":["1"]},{"Num":["2"]}]},{"Num":["3"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2+x)')),
+        '{"Add":[{"Num":["2"]},{"Var":["x"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2*x)')),
+        '{"Mul":[{"Num":["2"]},{"Var":["x"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, 'y*(2*x)')),
+        '{"Mul":[{"Var":["y"]},{"Mul":[{"Num":["2"]},{"Var":["x"]}]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2*x)*y')),
+        '{"Mul":[{"Mul":[{"Num":["2"]},{"Var":["x"]}]},{"Var":["y"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '((2*x)*y)+z')),
+        '{"Add":[{"Mul":[{"Mul":[{"Num":["2"]},{"Var":["x"]}]},{"Var":["y"]}]},{"Var":["z"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '1*2 + 3*4')),
         '{"Add":[{"Mul":[{"Num":["1"]},{"Num":["2"]}]},{"Mul":[{"Num":["3"]},{"Num":["4"]}]}]}');
     });
   });

@@ -148,10 +148,10 @@
                   length = ts_original.length - ts.length;
                 }
               } else { // Pass-through option with only one subtree.
-                if (subtrees.length != 1)
-                  return {"Error": "Pass-through case sequence should only have one sequence entry."};
+                if (subtrees.length > 1)
+                  throw Error("Pass-through case sequence should only have one sequence entry.");
 
-                if (ts_original.length - ts.length > length) {
+                if ((ts_original.length - ts.length) > length) {
                   longest = [subtrees[0], ts];
                   length = ts_original.length - ts.length;
                 }
