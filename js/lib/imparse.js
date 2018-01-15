@@ -180,7 +180,7 @@
       for (var nonterm in grammar[0]) {
         var tokens = imparse.tokenize(grammar, s);
         var tree_tokens = imparse.parse_tokens(grammar, tokens, nonterm);
-        return tree_tokens[0]; // Return only the tree.
+        return (tree_tokens != null) ? tree_tokens[0] : null; // Return only the tree.
       }
     }
     return {'Error': 'Cannot use the supplied grammar object.'};
