@@ -93,12 +93,13 @@
    * @param {string[]} ts_original - an array representing a token sequence.
    * @param {string} nonterm - root production rule's non-terminal.
    * @return {Object} an abstract syntax tree (AST) of nested objects.
+   * @throws error if grammar object is not constructed in a valid way.
    */
   imparse.parse_tokens = function (grammar, ts_original, nonterm) {
     // Find the appropriate produciton.
     for (var i = 0; i < grammar.length; i++) {
       if (nonterm in grammar[i]) {
-        var longest = null, length = 0;
+        var longest = {"result":null, "len":0};
 
         // For each option in the production.
         for (var j = 0; j < grammar[i][nonterm].length; j++) {
@@ -118,6 +119,7 @@
                   subtrees.push(result[0]);
                   ts = result[1];
                 } else {
+                  success = false;
                   break; // This sequence did not succeed.
                 }
               } else if (entry instanceof Object && 'RegExp' in entry) {
@@ -140,28 +142,25 @@
             } // for each entry in the sequence
 
             if (success) {
+              var ts_consumed = ts_original.length - ts.length;
               if (con.length > 0) {
-                if (ts_original.length - ts.length > length) {
+                if (ts_consumed > longest.len) {
                   var o = {};
                   o[con] = subtrees
-                  longest = [o, ts];
-                  length = ts_original.length - ts.length;
+                  longest = {"result":[o, ts], "len":ts_consumed};
                 }
               } else { // Pass-through option with only one subtree.
                 if (subtrees.length > 1)
                   throw Error("Pass-through case sequence should only have one sequence entry.");
-
-                if ((ts_original.length - ts.length) > length) {
-                  longest = [subtrees[0], ts];
-                  length = ts_original.length - ts.length;
-                }
+                if (ts_consumed > longest.len)
+                  longest = {"result":[subtrees[0], ts], "len":ts_consumed};
               }
             } // if tokens parsed with option sequence successfully
 
           } // unwrap JSON object for constructor and sequence
         } // for each possible sequence under the non-terminal
 
-        return longest; // First result that consumed as many tokens as any other.
+        return longest.result; // First result that consumed as many tokens as any other.
 
       } // if production is the one specified by argument
     } // for each production in grammar
@@ -174,6 +173,7 @@
    * @param {string} s - a string to tokenize and parse.
    * @param {string} nonterm - root production rule's non-terminal.
    * @return {Object} an abstract syntax tree (AST) of nested objects.
+   * @throws error if grammar object is not constructed in a valid way.
    */
   imparse.parse = function (grammar, s) {
     if (grammar.length > 0) {
@@ -183,7 +183,7 @@
         return (tree_tokens != null) ? tree_tokens[0] : null; // Return only the tree.
       }
     }
-    return {'Error': 'Cannot use the supplied grammar object.'};
+    throw Error("Cannot use the supplied grammar object.");
   };
 
 })(typeof exports !== 'undefined' ? exports : (this.imparse = {}));
