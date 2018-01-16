@@ -98,6 +98,7 @@ describe('imparse', function() {
       ]},
       {"Factor": [
         {"Mul": [["Atom"], "*", ["Factor"]]},
+        {"Mul": [["Atom"], ["Factor"]]},
         {"": [["Atom"]]}
       ]},
       {"Atom": [
@@ -117,9 +118,15 @@ describe('imparse', function() {
         '{"Add":[{"Num":["2"]},{"Var":["x"]}]}');
       assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2*x)')),
         '{"Mul":[{"Num":["2"]},{"Var":["x"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2x)')),
+        '{"Mul":[{"Num":["2"]},{"Var":["x"]}]}');
       assert.equal(JSON.stringify(imparse.parse(graPolynomials, 'y*(2*x)')),
         '{"Mul":[{"Var":["y"]},{"Mul":[{"Num":["2"]},{"Var":["x"]}]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, 'y(2*x)')),
+        '{"Mul":[{"Var":["y"]},{"Mul":[{"Num":["2"]},{"Var":["x"]}]}]}');
       assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2*x)*y')),
+        '{"Mul":[{"Mul":[{"Num":["2"]},{"Var":["x"]}]},{"Var":["y"]}]}');
+      assert.equal(JSON.stringify(imparse.parse(graPolynomials, '(2*x)y')),
         '{"Mul":[{"Mul":[{"Num":["2"]},{"Var":["x"]}]},{"Var":["y"]}]}');
       assert.equal(JSON.stringify(imparse.parse(graPolynomials, '((2*x)*y)+z')),
         '{"Add":[{"Mul":[{"Mul":[{"Num":["2"]},{"Var":["x"]}]},{"Var":["y"]}]},{"Var":["z"]}]}');
