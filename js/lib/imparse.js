@@ -62,7 +62,7 @@
         col += m[0].length;
       } else {
         if (s.length > 0)
-          console.log("Did not tokenize entire string.");
+          throw new Error("Did not tokenize entire string.");
         break;
       }
     }
