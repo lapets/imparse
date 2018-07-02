@@ -18,6 +18,7 @@
    * @return {string[]} the array of tokens obtained from the input string.
    */
   imparse.tokenize = function (grammar, s) {
+    let success = true;
     // Extract terminals from grammar.
     var terminals = [];
     for (var i = 0; i < grammar.length; i++) {
@@ -62,11 +63,12 @@
         col += m[0].length;
       } else {
         if (s.length > 0)
-          throw new Error("Did not tokenize entire string.");
+          console.log("Did not tokenize entire string.");
+          success = false;
         break;
       }
     }
-    return tokens;
+    return {tokens, success};
   };
 
   /**
@@ -178,9 +180,10 @@
   imparse.parse = function (grammar, s) {
     if (grammar.length > 0) {
       for (var nonterm in grammar[0]) {
-        var tokens = imparse.tokenize(grammar, s);
+        var {tokens, success} = imparse.tokenize(grammar, s);
         var tree_tokens = imparse.parse_tokens(grammar, tokens, nonterm);
-        return (tree_tokens != null) ? tree_tokens[0] : null; // Return only the tree.
+        var result = (tree_tokens != null) ? tree_tokens[0] : null;
+        return {result, success};
       }
     }
     throw Error("Cannot use the supplied grammar object.");
