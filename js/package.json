@@ -21,13 +21,13 @@
     "email": "a@lapets.io"
   },
   "contributors": [
-    { 
-      "name" : "Weston Vial",
-      "email" : "wevial@bu.edu"
+    {
+      "name": "Weston Vial",
+      "email": "wevial@bu.edu"
     },
-    { 
-      "name" : "Vidhu Nath",
-      "email" : "vnath@bu.edu"
+    {
+      "name": "Vidhu Nath",
+      "email": "vnath@bu.edu"
     }
   ],
   "license": "MIT",
