@@ -2,7 +2,7 @@
   "name": "imparse",
   "version": "0.1.4",
   "description": "Lightweight infinite-lookahead parser generator that supports basic grammars defined in a JSON format.",
-  "homepage": "http://imparse.org",
+  "homepage": "https://imparse.org",
   "repository": {
     "type": "git",
     "url": "https://github.com/lapets/imparse"
@@ -21,13 +21,17 @@
     "email": "a@lapets.io"
   },
   "contributors": [
-    { 
-      "name" : "Weston Vial",
-      "email" : "wevial@bu.edu"
+    {
+      "name": "Glenn Xavier",
+      "email": "gxavier@bu.edu"
     },
-    { 
-      "name" : "Vidhu Nath",
-      "email" : "vnath@bu.edu"
+    {
+      "name": "Weston Vial",
+      "email": "wevial@bu.edu"
+    },
+    {
+      "name": "Vidhu Nath",
+      "email": "vnath@bu.edu"
     }
   ],
   "license": "MIT",
