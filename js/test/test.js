@@ -4,6 +4,17 @@ var imparse = require('../lib/imparse');
 
 describe('imparse', function() {
   describe('#parse()', function () {
+    var graLiterals = [
+      {"Stmt": [
+        {"Foo": ["foo"]},
+        {"BarBaz": ["bar", "baz"]}
+      ]}
+    ];
+    it('literals', function() {
+      assert.equal(JSON.stringify(imparse.parse(graLiterals, 'foo')), '{"Foo":[]}');
+      assert.equal(JSON.stringify(imparse.parse(graLiterals, 'bar baz')), '{"BarBaz":[]}');
+    });
+
     var graList = [
       {"List": [
         {"Cons": ["()", ":", ["List"]]},
