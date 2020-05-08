@@ -177,13 +177,28 @@
    * @return {Object} an abstract syntax tree (AST) of nested objects.
    * @throws error if grammar object is not constructed in a valid way.
    */
-  imparse.parse = function (grammar, s) {
+  imparse.parse = function (grammar, s, status) {
+    // Determine if call wants a success/failure status in the result.
+    // Otherwise, an exception is thrown on failure.
+    status = (status != true) ? false : true;
+
     if (grammar.length > 0) {
       for (var nonterm in grammar[0]) {
         var {tokens, success} = imparse.tokenize(grammar, s);
         var tree_tokens = imparse.parse_tokens(grammar, tokens, nonterm);
         var result = (tree_tokens != null) ? tree_tokens[0] : null;
-        return {result, success};
+
+        // Either return the success/failure status with the result
+        // or throw an exception on failure, depending on the caller's
+        // supplied preference flag.
+        if (status) {
+            return {result, success};
+        } else {
+            if (success)
+                return result;
+            else
+                throw Error("Tokenization failed.");
+        }
       }
     }
     throw Error("Cannot use the supplied grammar object.");
